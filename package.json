@@ -26,10 +26,6 @@
         "icon": "$(github-action)"
       },
       {
-        "command": "promptrocket.showChatPanel",
-        "title": "PromptRocket: Open Chat Panel"
-      },
-      {
         "command": "promptrocket.sendMessage",
         "title": "PromptRocket: Send a Message to Chat"
       },
@@ -131,7 +127,7 @@
         },
         "promptrocket.defaultSystemMessage": {
           "type": "string",
-          "default": "You are a powerful AI programming assistant called PromptRocket. Think step by step to bring out the best results.",
+          "default": "You are a powerful AI programming assistant called PromptRocket. Answer short, clear and consise.",
           "description": "Default system message"
         },
         "promptrocket.chatTemplates": {

@@ -216,7 +216,7 @@ textarea:focus {
     width: 25px;
     height: 25px;
     background: transparent;
-    color: var(--vscode-toolbar-foreground);
+    color: var(--vscode-input-placeholderForeground);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,7 +240,8 @@ textarea:focus {
     padding: 2px;
     border-radius: 4px;
     background: var(--vscode-input-background);
-    box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.15);
+    border-color: var(--vscode-dropdown-border);
+    box-shadow: 0px 0px 8px 2px var(--vscode-widget-shadow);
 }
 
 #code-wrapper {

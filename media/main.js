@@ -56,6 +56,8 @@ function bindCodeButtonEvents() {
         button.addEventListener('click', () => {
             if (action === 'copyToClipboardButton') {
                 copyToClipboard(escapedCode);
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.innerHTML = '<i class="fas fa-check"></i>';
             } else if (action === 'replaceSelectedTextButton') {
                 replaceSelectedText(escapedCode);
             }

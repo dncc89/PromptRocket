@@ -10,17 +10,18 @@ I had a hard time finding the perfect AI assistant, as there were many options b
 
 Here are some core principles of PromptRocket:
 
-1. **It should remember chat history while keeping track of text selections.**
+1. **Ensure full customization of the model and prompts.**
+
+This is the primary reason I created this extension. It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
+
+2. **It should remember chat history while keeping track of text selections.**
 
 PromptRocket tracks chat history and recognizes your text selections, as well as the context surrounding them. The main purpose of this extension is to boost brainstorming by integrating ChatGPT's conversational format into VSCode.
 
-2. **Maintain a simple and tidy UI that doesn't disrupt visuals.**
+3. **Maintain a simple and tidy UI that doesn't disrupt visuals.**
 
 I promise there won't be any flashy elements in the panel.
 
-3. **Ensure full customization of the model and prompts.**
-
-This is the primary reason I created this extension. It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
 
 # How to Use
 PromptRocket provides two ways of use, chat mode and command mode.
@@ -64,8 +65,7 @@ Here's one of the basic examples.
 }
 ```
 
-And here is few-shot-prompt example, by giving the AI few examples how it should response, and reinforce it by giving positive feedback.
-This greatly helps keeping GPT-3.5's response on track.
+Here is a few-shot prompt example, which involves giving the AI a few examples of how it should respond, and reinforcing it with positive feedback. This greatly helps in keeping GPT-3.5's responses on track.
 
 ```json
 {

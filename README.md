@@ -1,6 +1,6 @@
 # PromptRocket
 
-![Intro](https://github.com/dncc89/PromptRocket/raw/main/public/intro.gif)
+![Intro](https://i.imgur.com/maLt7mn.gif, "Intro")
 
 PromptRocket is a AI-powered extension for VSCode that effortlessly brings contextual understanding to your side panel. By intelligently analyzing your text selection, it grasps the context and provides relevant suggestions, enhancing your coding experience. Seamlessly integrate PromptRocket to your workflow, and watch your productivity soar through the power of AI-driven insights.
 Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.

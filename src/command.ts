@@ -34,7 +34,7 @@ export class Command {
 
         stream.on('data', (data) => {
             text += data;
-            let shortMsg = text.slice(-20);
+            let shortMsg = text.slice(-10);
             const progressMessage = `Thinking: ${shortMsg}`;
             vscode.window.setStatusBarMessage(progressMessage, 1000);
         });

@@ -134,59 +134,25 @@
           "type": "array",
           "default": [
             {
-              "name": "Explain Code",
+              "name": "1. Identify Issues",
               "argument": false,
               "prompts": [
                 {
                   "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                  "content": "You are a powerful AI programming assistant well-versed in debugging code across various programming languages. Identify issues with the provided code and offer solutions."
                 },
                 {
                   "role": "user",
-                  "content": "We're using {{language}}."
+                  "content": "Here's my code written in {{language}}:\\n```{{context_before}}{{selected_text}}{{context_after}}```"
                 },
                 {
                   "role": "user",
-                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "Please analyze and explain this code."
+                  "content": "Please identify any issues with this code and suggest how to fix them."
                 }
               ]
             },
             {
-              "name": "Complete Code",
-              "argument": false,
-              "prompts": [
-                {
-                  "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
-                },
-                {
-                  "role": "user",
-                  "content": "We're using {{language}}."
-                },
-                {
-                  "role": "user",
-                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "Please complete the code between the context."
-                }
-              ]
-            },
-            {
-              "name": "Modify Code",
+              "name": "2. Refactor Code",
               "argument": true,
               "prompts": [
                 {
@@ -216,20 +182,54 @@
               ]
             },
             {
-              "name": "Identify Issues",
+              "name": "3. Autocomplete Code",
               "argument": false,
               "prompts": [
                 {
                   "role": "system",
-                  "content": "You are a powerful AI programming assistant well-versed in debugging code across various programming languages. Identify issues with the provided code and offer solutions."
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
                 },
                 {
                   "role": "user",
-                  "content": "Here's my code written in {{language}}:\\n```{{context_before}}{{selected_text}}{{context_after}}```"
+                  "content": "We're using {{language}}."
                 },
                 {
                   "role": "user",
-                  "content": "Please identify any issues with this code and suggest how to fix them."
+                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please complete the code between the context."
+                }
+              ]
+            },
+            {
+              "name": "4. Explain Code",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "We're using {{language}}."
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please analyze and explain this code."
                 }
               ]
             }
@@ -240,7 +240,7 @@
           "type": "array",
           "default": [
             {
-              "name": "Autocomplete code",
+              "name": "1. Autocomplete code",
               "argument": false,
               "prompts": [
                 {
@@ -266,7 +266,7 @@
               ]
             },
             {
-              "name": "Write a Code Snippet",
+              "name": "2. Write a Code Snippet",
               "argument": true,
               "prompts": [
                 {
@@ -280,7 +280,7 @@
               ]
             },
             {
-              "name": "Write a Comment",
+              "name": "3. Write a Comment",
               "argument": false,
               "prompts": [
                 {

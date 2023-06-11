@@ -1,14 +1,9 @@
-import * as fs from 'fs';
 import * as message from './message';
-import * as path from 'path';
 import * as payload from './payload';
 import * as utils from './utils';
 import * as vscode from 'vscode';
 
 import { IMessage } from './interfaces';
-import { config } from 'process';
-import { start } from 'repl';
-import { json } from 'stream/consumers';
 
 export class ChatView implements vscode.WebviewViewProvider {
     public static readonly viewType = 'promptrocket.view';

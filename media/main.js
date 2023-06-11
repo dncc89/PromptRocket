@@ -357,6 +357,12 @@ function updateButtonContainerPosition(event, buttonContainer) {
 
 function getSelectedText() {
     let selectedText = '';
+    const excludedElement = document.querySelector('.inputbox');
+
+    if (excludedElement && document.activeElement === excludedElement) {
+        return selectedText;
+    }
+
     if (window.getSelection) {
         selectedText = window.getSelection().toString();
     } else if (document.selection && document.selection.type !== 'Control') {

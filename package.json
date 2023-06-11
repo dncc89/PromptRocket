@@ -1,8 +1,8 @@
 {
   "name": "promptrocket",
-  "publisher": "SkateparkCoder",
+  "publisher": "dncc89",
   "displayName": "PromptRocket",
-  "description": "Run your own AI prompt in VSCode",
+  "description": "Run your own AI prompts in VSCode",
   "version": "0.1.0",
   "icon": "public/icon.png",
   "engines": {

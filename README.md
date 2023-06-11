@@ -6,13 +6,11 @@ PromptRocket is a AI-powered extension for VSCode that effortlessly brings conte
 Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.
 
 ## What's the difference?
-I had a hard time finding the perfect AI assistant, as there were many options but none catered to my needs for convenience and customization. Though GitHub's Copilot Chat is a top choice, it uses GPT-3.5 and Codex, which aren't the best performers at this moment. So, I decided to build my own custom AI assistant that fits my specific needs.
-
 Here are some core principles of PromptRocket:
 
 1. **Ensure full customization of the model and prompts.**
 
-This is the primary reason I created this extension. It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
+ It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
 
 2. **It should remember chat history while keeping track of text selections.**
 

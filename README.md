@@ -31,14 +31,24 @@ Realizing the importance of convenience and customization, our chat mode lets yo
 
 - **New Chat** - Launches a new, empty chat free of templates.
 - **Open Chat Template** - Begins a chat utilizing a personalized template.
-- **Send a Message to Chat** - Acts as a handy shortcut for sending messages to the chat. 
-Just press **ctrl(cmd) + shift + '**!
 
 ## Simplified Command Mode
 Catering to your need for a streamlined experience, our command mode operates directly within the editor. It's perfect for uncomplicated tasks, such as generating code snippets or incorporating comments. GPT-4 compatibility makes it a recommended choice.
 
 - **Run Editor Command** - Executes a command inside the editor, specifically designed for template mode. 
 Shortcut is **ctrl(cmd) + shift + ;**.
+
+## Extra functions
+It also has a few extra functions for your quality of life.
+
+### Commands
+
+- **Insert Last Codeblock to Editor** - This command automatically inserts the last codeblock in the chat into your editor.
+- **Send a Message to Chat** - Acts as a handy shortcut for sending messages to the chat. Just press **ctrl(cmd) + shift + '**, yon't need to use mouse!
+
+### General
+
+- **Copy or Insert Text into Editor** - Just select any text in the chat, it will display a group of buttons to copy text to clipboard, or send into editor.
 
 # Prompt Template Examples
 In PromptRocket, you can create various command templates and utilize Few-Shot Prompts by incorporating example conversations. While PromptRocket supplies default prompts for coding, you can also craft your own templates for general writing tasks.

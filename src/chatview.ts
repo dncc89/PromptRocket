@@ -178,7 +178,7 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _updateMessageArray(id: number) {
         // Remove all messages after the id
         // System message is at 1, should not be removed
-        console.log(`id: ${id} toRemove: ${this._initialMessageLength}, messagelength: ${this._messages.length}`);
+        // console.log(`id: ${id} toRemove: ${this._initialMessageLength}, messagelength: ${this._messages.length}`);
         if (id < this._messages.length) {
             for (let i = this._messages.length; i >= id; i--) {
                 this._messages.pop();
@@ -205,9 +205,9 @@ export class ChatView implements vscode.WebviewViewProvider {
             else {
                 // grab text selection and compare what's stored in the variable
                 const selection = utils.getContext()[1];
-                let context = '';
+                let context = `Context:\`\`\`${selection}\`\`\`\n`;
                 if (selection === '' || selection === this._textSelection) {
-                    context = `Context:\`\`\`${selection}\`\`\`\n`;
+                    context = '';
                 }
 
                 this._textSelection = selection;

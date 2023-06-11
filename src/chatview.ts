@@ -271,6 +271,11 @@ export class ChatView implements vscode.WebviewViewProvider {
         const userName = vscode.workspace.getConfiguration("promptrocket").get("userName", []);
         const assistantName = vscode.workspace.getConfiguration("promptrocket").get("assistantName", []);
         const welcomeMessage = `Hello <b>${userName}</b>! How can I assist you today? 👩‍💻👨‍💻🚀`;
+        const configuration = vscode.workspace.getConfiguration('editor');
+        const fontSize = configuration.get('fontSize') as number;
+        const lineHeight = configuration.get('lineHeight') as number;
+        const lineHeightInt = Math.floor(fontSize * lineHeight);
+
         const scriptPathOnDisk = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'main.js');
         const cssPathOnDisk = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'main.css');
         const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'codicon.css');
@@ -295,6 +300,11 @@ export class ChatView implements vscode.WebviewViewProvider {
             <link href="${mainStyles}" rel="stylesheet">
             <link href="${codicons}" rel="stylesheet">
             <link href="${fontawesome}" rel="stylesheet">
+                <style>
+                    :root {
+                        --vscode-line-height: ${lineHeight};
+                    }
+                </style>
             <title>Chat Panel</title>
         </head>
         <body>

@@ -6,6 +6,7 @@ body {
     height: 100vh;
     font-family: var(--vscode-font-family);
     font-size: var(--vscode-font-size);
+    line-height: var(--vscode-line-height);
     padding: 0px;
 
 }

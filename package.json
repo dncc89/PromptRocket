@@ -1,0 +1,363 @@
+{
+  "name": "promptrocket",
+  "publisher": "SkateparkCoder",
+  "displayName": "PromptRocket",
+  "description": "Run your own AI prompt in VSCode",
+  "version": "0.1.0",
+  "icon": "public/icon.png",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "promptrocket.openChatTemplate",
+        "title": "PromptRocket: Open Chat Template",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "promptrocket.openCommandTemplate",
+        "title": "PromptRocket: Run Editor Command",
+        "icon": "$(debug-line-by-line)"
+      },
+      {
+        "command": "promptrocket.showChatPanel",
+        "title": "PromptRocket: Open Chat Panel"
+      },
+      {
+        "command": "promptrocket.sendMessage",
+        "title": "PromptRocket: Send a Message to Chat"
+      },
+      {
+        "command": "promptrocket.insertLastCodeblock",
+        "title": "PromptRocket: Insert Last Codeblock to Editor"
+      },
+      {
+        "command": "promptrocket.newChat",
+        "title": "PromptRocket: New Chat",
+        "icon": "$(add)"
+      },
+      {
+        "command": "promptrocket.openSettings",
+        "title": "PromptRocket: Open Settings",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "promptrocket.setkey",
+        "title": "PromptRocket: Set API Key"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "promptrocket.sendMessage",
+        "key": "ctrl+shift+'",
+        "mac": "cmd+shift+'"
+      },
+      {
+        "command": "promptrocket.openCommandTemplate",
+        "key": "ctrl+shift+;",
+        "mac": "cmd+shift+;"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "promptrocket-container",
+          "title": "PromptRocket",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "promptrocket-container": [
+        {
+          "type": "webview",
+          "id": "promptrocket.view",
+          "name": "Chat"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "promptrocket.openSettings",
+          "when": "view == promptrocket.view",
+          "group": "navigation"
+        },
+        {
+          "command": "promptrocket.openChatTemplate",
+          "when": "view == promptrocket.view",
+          "group": "navigation"
+        },
+        {
+          "command": "promptrocket.openCommandTemplate",
+          "when": "view == promptrocket.view",
+          "group": "navigation"
+        },
+        {
+          "command": "promptrocket.newChat",
+          "when": "view == promptrocket.view",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "promptrocket",
+      "properties": {
+        "promptrocket.userName": {
+          "type": "string",
+          "default": "User",
+          "description": "Username in the chat."
+        },
+        "promptrocket.assistantName": {
+          "type": "string",
+          "default": "PromptRocket",
+          "description": "AI's name in the chat."
+        },
+        "promptrocket.useGPT4": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use GPT-4"
+        },
+        "promptrocket.contextLength": {
+          "type": "number",
+          "default": 5,
+          "description": "Lines of context before and after the cursor to send to the AI"
+        },
+        "promptrocket.defaultSystemMessage": {
+          "type": "string",
+          "default": "You are a powerful AI programming assistant called PromptRocket. Think step by step to bring out the best results.",
+          "description": "Default system message"
+        },
+        "promptrocket.chatTemplates": {
+          "type": "array",
+          "default": [
+            {
+              "name": "Explain Code",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "We're using {{language}}."
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please analyze and explain this code."
+                }
+              ]
+            },
+            {
+              "name": "Complete Code",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "We're using {{language}}."
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please complete the code between the context."
+                }
+              ]
+            },
+            {
+              "name": "Modify Code",
+              "argument": true,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "The language we're using is {{language}}."
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context above the selected text:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the selected text:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the selected text between the context:\\n ```{{selected_text}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Requested task: ```{{argument}}```"
+                }
+              ]
+            },
+            {
+              "name": "Identify Issues",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are a powerful AI programming assistant well-versed in debugging code across various programming languages. Identify issues with the provided code and offer solutions."
+                },
+                {
+                  "role": "user",
+                  "content": "Here's my code written in {{language}}:\\n```{{context_before}}{{selected_text}}{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please identify any issues with this code and suggest how to fix them."
+                }
+              ]
+            }
+          ],
+          "description": "Array of command templates for the Mini AI extension"
+        },
+        "promptrocket.commandTemplates": {
+          "type": "array",
+          "default": [
+            {
+              "name": "Autocomplete code",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "We're using {{language}}."
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
+                },
+                {
+                  "role": "user",
+                  "content": "Please complete the code between the context. Reply only the new code."
+                }
+              ]
+            },
+            {
+              "name": "Write a Code Snippet",
+              "argument": true,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. You will wrie a requested code and only return that."
+                },
+                {
+                  "role": "user",
+                  "content": "We're using {{language}}. Please write a code based on this request and only return the code: ```{{argument}}```"
+                }
+              ]
+            },
+            {
+              "name": "Write a Comment",
+              "argument": false,
+              "prompts": [
+                {
+                  "role": "system",
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                },
+                {
+                  "role": "user",
+                  "content": "```javascript console.log('Hello World!');```"
+                },
+                {
+                  "role": "assistant",
+                  "content": "// Write Hello World! to the console"
+                },
+                {
+                  "role": "user",
+                  "content": "That was perfect! Here's another one: ```python def generate_fibonacci(n): if n <= 1: return n else: return(generate_fibonacci(n-1) + generate_fibonacci(n-2))```"
+                },
+                {
+                  "role": "assistant",
+                  "content": "# Generate the nth Fibonacci number"
+                },
+                {
+                  "role": "user",
+                  "content": "That was perfect! Here's another one: \\n```{{language}} {{context_after}}```"
+                }
+              ]
+            }
+          ],
+          "description": "Array of command templates for the Mini AI extension"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/jsonlint": "^1.6.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^16.18.34",
+    "@types/node-fetch": "^2.6.4",
+    "@types/vscode": "^1.78.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.33",
+    "cross-fetch": "^3.1.6",
+    "data-uri-to-buffer": "^5.0.1",
+    "jsonlint": "^1.6.3",
+    "node-fetch": "^2.6.11",
+    "stream": "^0.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dncc89/promptrocket.git"
+  }
+}

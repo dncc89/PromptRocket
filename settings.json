@@ -1,0 +1,7 @@
+{
+    "promptrocket.useGPT4": {
+        "type": "boolean",
+        "default": false,
+        "description": "Use GPT4 as default. This adds # as prefix in the prompt."
+    }
+}

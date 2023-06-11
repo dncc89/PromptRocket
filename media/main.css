@@ -7,6 +7,23 @@ body {
     font-family: var(--vscode-font-family);
     font-size: var(--vscode-font-size);
     padding: 0px;
+
+}
+
+::selection {
+    background: var(--vscode-editor-selectionBackground);
+}
+
+::-moz-selection {
+    background: var(--vscode-editor-selectionBackground);
+}
+
+.inactive-selection *::selection {
+    background: var(--vscode-editor-inactiveSelectionBackground);
+}
+
+.inactive-selection *::-moz-selection {
+    background: var(--vscode-editor-inactiveSelectionBackground);
 }
 
 app {
@@ -124,6 +141,16 @@ app {
     border: 1px solid var(--vscode-focusBorder);
 }
 
+textarea {
+    border: none;
+    outline: none;
+}
+
+textarea:focus {
+    border: none;
+    outline: none;
+}
+
 .button {
     padding: 5px 10px 5px 10px;
     background: var(--vscode-button-background);
@@ -189,6 +216,9 @@ app {
     height: 25px;
     background: transparent;
     color: var(--vscode-toolbar-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button-icon:hover {
@@ -197,6 +227,19 @@ app {
 
 .button-icon:disabled {
     background: transparent;
+}
+
+.text-button-container {
+    z-index: 9999;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    background: var(--vscode-input-background);
+    box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.15);
 }
 
 #code-wrapper {

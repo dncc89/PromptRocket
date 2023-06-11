@@ -3,10 +3,10 @@
 ![Alt Text Here](public/intro.gif)
 
 PromptRocket is a AI-powered extension for VSCode that effortlessly brings contextual understanding to your side panel. By intelligently analyzing your text selection, it grasps the context and provides relevant suggestions, enhancing your coding experience. Seamlessly integrate PromptRocket to your workflow, and watch your productivity soar through the power of AI-driven insights.
-Check out the [PromptRocket GitHub repository](https://github.com/SkateparkCoder/PromptRocket) for more details and updates.
+Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.
 
 ## What's the difference?
-I had a hard time finding the perfect AI assistant, as there were many options but none catered to my needs for convenience and customization. Though GitHub's Copilot Chat is a top choice, it uses GPT-3.5 and Codex, which aren't the best performers. So, I decided to build my own custom AI assistant that fits my specific needs.
+I had a hard time finding the perfect AI assistant, as there were many options but none catered to my needs for convenience and customization. Though GitHub's Copilot Chat is a top choice, it uses GPT-3.5 and Codex, which aren't the best performers at this moment. So, I decided to build my own custom AI assistant that fits my specific needs.
 
 Here are some core principles of PromptRocket:
 
@@ -20,7 +20,7 @@ I promise there won't be any flashy elements in the panel.
 
 3. **Ensure full customization of the model and prompts.**
 
-This is primarily designed for use with GPT-4, incorporating prompt engineering techniques such as custom system messages, step-by-step thinking, and few-shot prompts.
+This is the primary reason I created this extension. It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
 
 # How to Use
 PromptRocket provides two ways of use, chat mode and command mode.
@@ -39,7 +39,7 @@ Catering to your need for a streamlined experience, our command mode operates di
 - **Run Editor Command** - Executes a command inside the editor, specifically designed for template mode. 
 Shortcut is **ctrl(cmd) + shift + ;**.
 
-# Prompt Templates
+# Prompt Template Examples
 In PromptRocket, you can create various command templates and utilize Few-Shot Prompts by incorporating example conversations. While PromptRocket supplies default prompts for coding, you can also craft your own templates for general writing tasks.
 
 Here's one of the basic examples.
@@ -63,6 +63,43 @@ Here's one of the basic examples.
     ]
 }
 ```
+
+And here is few-shot-prompt example, by giving the AI few examples how it should response, and reinforce it by giving positive feedback.
+This greatly helps keeping GPT-3.5's response on track.
+
+```json
+{
+    "name": "Write a Comment",
+    "argument": false,
+    "prompts": [
+    {
+        "role": "system",
+        "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+    },
+    {
+        "role": "user",
+        "content": "```javascript console.log('Hello World!');```"
+    },
+    {
+        "role": "assistant",
+        "content": "// Write Hello World! to the console"
+    },
+    {
+        "role": "user",
+        "content": "That was perfect! Here's another one: ```python def generate_fibonacci(n): if n <= 1: return n else: return(generate_fibonacci(n-1) + generate_fibonacci(n-2))```"
+    },
+    {
+        "role": "assistant",
+        "content": "# Generate the nth Fibonacci number"
+    },
+    {
+        "role": "user",
+        "content": "That was perfect! Here's another one: \\n```{{language}} {{context_after}}```"
+    }
+    ]
+}
+```
+
 Messages use the handlebar template format, enabling you to include editor information such as the context surrounding the cursor, selected text, and the current language.
 Here's the complete list of tokens:
 - {{language}} - File's language setting

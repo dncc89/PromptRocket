@@ -13,6 +13,7 @@ let currentText = '';
 let messages = [];
 let wrappers = [];
 let isStreaming = false;
+let selectionButtonContainer = null;
 
 // Requst messages to populate on view reset
 viewInitialized();
@@ -25,8 +26,8 @@ renderer.code = (code, language) => {
     const escapedCode = escapeHtml(code);
     vscode.postMessage({ command: 'updateCodeblockBuffer', text: code });
 
-    const buttonId1 = 'copyToClipboardButton' + '_' + Date.now();
-    const buttonId2 = 'replaceSelectedTextButton' + '_' + Date.now();
+    const buttonId1 = 'copyToClipboardButton' + '_' + generateUUID();
+    const buttonId2 = 'replaceSelectedTextButton' + '_' + generateUUID();
 
     return `
     <div id="code-wrapper">
@@ -62,6 +63,38 @@ function bindCodeButtonEvents() {
     });
 }
 
+function initTextSelectionButton() {
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'text-button-container';
+    buttonContainer.style.display = 'none';
+    document.body.appendChild(buttonContainer);
+
+    // Add copyToClipboardButton
+    const copyToClipboardButton = document.createElement('button');
+    copyToClipboardButton.className = 'button-icon';
+    copyToClipboardButton.id = 'copyToClipboardButton';
+    copyToClipboardButton.innerHTML = '<i class="fa-regular fa-clipboard"></i>';
+
+    copyToClipboardButton.addEventListener('click', () => {
+        copyToClipboard(getSelectedText());
+    });
+
+    buttonContainer.appendChild(copyToClipboardButton);
+
+    // Add replaceSelectedTextButton
+    const replaceSelectedTextButton = document.createElement('button');
+    replaceSelectedTextButton.className = 'button-icon';
+    replaceSelectedTextButton.id = 'replaceSelectedTextButton';
+    replaceSelectedTextButton.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket"></i>';
+
+    replaceSelectedTextButton.addEventListener('click', () => {
+        replaceSelectedText(getSelectedText());
+    });
+
+    buttonContainer.appendChild(replaceSelectedTextButton);
+}
+initTextSelectionButton();
+
 const loadingInterval = setInterval(() => {
     inputPlaceholder = thinkingTexts[counter % thinkingTexts.length];
     if (counter > 10) { counter = 0; }
@@ -87,6 +120,13 @@ sendButton.addEventListener('click', () => {
 });
 
 window.addEventListener('message', handleMessage);
+window.addEventListener('blur', function () {
+    document.body.classList.add('inactive-selection');
+});
+window.addEventListener('focus', function () {
+    document.body.classList.remove('inactive-selection');
+});
+document.addEventListener('mouseup', debounce(showButtonsOnSelectedText), 250);
 
 textAreaResize(userInput);
 userInput.addEventListener("keypress", function (event) {
@@ -135,6 +175,7 @@ function handleMessage(event) {
             currentWrapper = null;
             currentText = '';
     }
+    bindCodeButtonEvents();
 }
 
 
@@ -170,7 +211,6 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
     else
         messages[id].innerHTML = marked.parse(currentText, { renderer });
 
-    bindCodeButtonEvents();
     currentWrapper.appendChild(messages[id]);
 
     // clickable message
@@ -234,8 +274,6 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
     outputContainer.scrollTop = outputContainer.scrollHeight;
 }
 
-
-
 function updateTextareaState() {
     if (isStreaming) {
         userInput.disabled = true;
@@ -266,10 +304,10 @@ function replaceSelectedText(text) {
 }
 
 function viewInitialized() {
-    console.log('view initialized');
     vscode.postMessage({
         command: 'viewInitialized'
     });
+    bindCodeButtonEvents();
 }
 function escapeHtml(html) {
     return html
@@ -280,11 +318,64 @@ function escapeHtml(html) {
         .replace(/'/g, "&#039;");
 }
 
-function escapeQuotes(str) {
-    return str.replace(/"/g, '\\"').replace(/'/g, "\\'");
+function showButtonsOnSelectedText(event) {
+    const selectedText = getSelectedText();
+    const buttonContainer = document.querySelector('.text-button-container');
+
+    if (selectedText) {
+        // Update button container's position and content
+        updateButtonContainerPosition(event, buttonContainer);
+        buttonContainer.style.display = 'flex';
+    } else {
+        // Hide button container if no text is selected
+        buttonContainer.style.display = 'none';
+    }
 }
 
-// Example of `anotherFunction` - you can replace this with your desired function
-function anotherFunction(input) {
-    console.log(input);
+function updateButtonContainerPosition(event, buttonContainer) {
+    const selection = window.getSelection();
+    const rects = selection.getRangeAt(0).getClientRects();
+    let topMost = Number.POSITIVE_INFINITY;
+    let rightMost = Number.NEGATIVE_INFINITY;
+
+    for (const rect of rects) {
+        topMost = Math.min(topMost, rect.top);
+        rightMost = Math.max(rightMost, rect.right);
+    }
+
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    const buttonContainerHeight = 35;
+    const buttonContainerWidth = 80;
+    const adjustedTop = Math.min(topMost - buttonContainerHeight, windowHeight - buttonContainerHeight);
+    const adjustedLeft = Math.min(rightMost, windowWidth - buttonContainerWidth);
+    buttonContainer.style.top = `${adjustedTop}px`;
+    buttonContainer.style.left = `${adjustedLeft}px`;
+}
+
+function getSelectedText() {
+    let selectedText = '';
+    if (window.getSelection) {
+        selectedText = window.getSelection().toString();
+    } else if (document.selection && document.selection.type !== 'Control') {
+        selectedText = document.selection.createRange().text;
+    }
+    return selectedText;
+}
+
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
 }

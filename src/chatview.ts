@@ -205,17 +205,17 @@ export class ChatView implements vscode.WebviewViewProvider {
             else {
                 // grab text selection and compare what's stored in the variable
                 const selection = utils.getContext()[1];
-                let newContent = `Context:\`\`\`${selection}\`\`\`\n ${text}`;
-
+                let context = '';
                 if (selection === '' || selection === this._textSelection) {
-                    newContent = text;
+                    context = `Context:\`\`\`${selection}\`\`\`\n`;
                 }
 
                 this._textSelection = selection;
 
                 const userMessage: IMessage = {
                     role: 'user',
-                    content: newContent,
+                    hiddenContext: context,
+                    content: text,
                 };
                 this._messages.push(userMessage);
             }
@@ -268,7 +268,9 @@ export class ChatView implements vscode.WebviewViewProvider {
     }
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
+        const userName = vscode.workspace.getConfiguration("promptrocket").get("userName", []);
         const assistantName = vscode.workspace.getConfiguration("promptrocket").get("assistantName", []);
+        const welcomeMessage = `Hello <b>${userName}</b>! How can I assist you today? 👩‍💻👨‍💻🚀`;
         const scriptPathOnDisk = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'main.js');
         const cssPathOnDisk = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'main.css');
         const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'media', 'codicon.css');
@@ -304,7 +306,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 <div id="message-list">
                     <div class="assistant-message-wrapper"> 
                         <div class="sender-assistant"><span class="fa-solid fa-user-astronaut margin-right-5"></span><span>${assistantName}</span></div><div class="extension-message">
-                        <p>Hello! How can I assist you today? 🚀</p>
+                        <p>${welcomeMessage}</p>
                         </div>
                     </div>
                 </div>

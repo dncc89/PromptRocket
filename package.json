@@ -18,12 +18,12 @@
       {
         "command": "promptrocket.openChatTemplate",
         "title": "PromptRocket: Open Chat Template",
-        "icon": "$(comment-discussion)"
+        "icon": "$(beaker)"
       },
       {
         "command": "promptrocket.openCommandTemplate",
         "title": "PromptRocket: Run Editor Command",
-        "icon": "$(debug-line-by-line)"
+        "icon": "$(github-action)"
       },
       {
         "command": "promptrocket.showChatPanel",
@@ -87,22 +87,22 @@
         {
           "command": "promptrocket.openSettings",
           "when": "view == promptrocket.view",
-          "group": "navigation"
+          "group": "navigation@3"
         },
         {
           "command": "promptrocket.openChatTemplate",
           "when": "view == promptrocket.view",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "promptrocket.openCommandTemplate",
           "when": "view == promptrocket.view",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "promptrocket.newChat",
           "when": "view == promptrocket.view",
-          "group": "navigation"
+          "group": "navigation@0"
         }
       ]
     },

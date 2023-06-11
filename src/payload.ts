@@ -5,6 +5,16 @@ import { ICommand, IMessage } from './interfaces';
 
 export function generatePayload(messages: IMessage[], apiKey: string) {
     const config = vscode.workspace.getConfiguration('promptrocket');
+    let newMessages: IMessage[] = [];
+
+    // Go through messages and combine content and hiddenContext
+    messages.forEach((msg) => {
+        newMessages.push({
+            role: msg.role,
+            content: msg.hiddenContext ? msg.hiddenContext + msg.content : msg.content,
+        });
+    });
+
     const payload = {
         method: "POST",
         headers: {
@@ -13,7 +23,7 @@ export function generatePayload(messages: IMessage[], apiKey: string) {
         },
         body: JSON.stringify({
             model: config.get('useGPT4') ? "gpt-4" : "gpt-3.5-turbo",
-            messages: messages,
+            messages: newMessages,
             stream: true,
         }),
     };

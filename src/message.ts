@@ -83,9 +83,14 @@ export function preprocessMessages(messages: IMessage[]) {
 
     messages.forEach((msg) => {
         let role = msg.role || "user";
+        let hiddenContext = msg.hiddenContext || "";
         let content = msg.content || "";
 
-        // Build prompt 
+        hiddenContext = hiddenContext.replace(/{{language}}/g, language);
+        hiddenContext = hiddenContext.replace(/{{context_before}}/g, context[0]);
+        hiddenContext = hiddenContext.replace(/{{selected_text}}/g, context[1]);
+        hiddenContext = hiddenContext.replace(/{{context_after}}/g, context[2]);
+
         content = content.replace(/{{language}}/g, language);
         content = content.replace(/{{context_before}}/g, context[0]);
         content = content.replace(/{{selected_text}}/g, context[1]);
@@ -93,6 +98,7 @@ export function preprocessMessages(messages: IMessage[]) {
 
         const newMessage: IMessage = {
             role: role,
+            hiddenContext: hiddenContext,
             content: content,
         };
 

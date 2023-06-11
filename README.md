@@ -82,7 +82,7 @@ Here is a few-shot prompt example, which involves giving the AI a few examples o
     "prompts": [
     {
         "role": "system",
-        "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+        "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Return a comment string about the given code."
     },
     {
         "role": "user",

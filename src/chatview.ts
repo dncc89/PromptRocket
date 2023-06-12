@@ -4,6 +4,7 @@ import * as utils from './utils';
 import * as vscode from 'vscode';
 
 import { IMessage } from './interfaces';
+import { config } from 'process';
 
 export class ChatView implements vscode.WebviewViewProvider {
     public static readonly viewType = 'promptrocket.view';
@@ -15,64 +16,83 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _initialMessageLength: number = 0;
     private _codeblockBuffer: string = '';
     private _config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("promptrocket");
+    private _globalState: vscode.Memento;
     private _cancelToken = false;
+    private _firstLaunch = true;
 
     constructor(context: vscode.ExtensionContext, apiKey: string) {
         this._view = undefined;
         this._context = context;
         this._apiKey = apiKey;
+        this._globalState = context.globalState;
+        this._loadMessages();
     }
 
     startNewChat(messages: IMessage[], argument: string) {
         this._resetWebview();
-        this._cancelToken = true;
         this._messages = messages;
+        this._cancelToken = true;
+        this._saveMessages();
 
         if (this._messages.length === 0) {
             // Add default system message if there are no messages
             const sysMsg = this._config.get("defaultSystemMessage", []) as unknown as string;
             const defaultMessage: IMessage = {
                 role: 'system',
-                content: sysMsg || 'You are a powerful AI programming assistant called PromptRocket.'
+                content: sysMsg
             };
             this._messages.push(defaultMessage);
             this._initialMessageLength = this._messages.length;
         }
         else {
-            // If it starts with messages, it means it's a template.
-            this._initialMessageLength = this._messages.length;
-            if (argument) {
-                this.sendUserMessage(argument);
+            // If it starts with messages, it means it's a template. 
+            // However on first launch it also loads saved messages, should not be treated as template
+            if (this._firstLaunch) {
+                this._firstLaunch = false;
+                this._initialMessageLength = 0;
             }
             else {
-                this.sendUserMessage(this._messages[this._messages.length - 1].content || '');
+                if (argument) {
+                    this.sendUserMessage(argument);
+                }
+                else {
+                    this.sendUserMessage(this._messages[this._messages.length - 1].content || '');
+                }
+                this._initialMessageLength = this._messages.length;
             }
         }
     }
 
     // Send user message from the extension, so it will be displayed in the chat
-    async sendUserMessage(text: string, isUserMessage: boolean = true, startCompletion: boolean = true, returnFocus: boolean = false) {
+    async sendUserMessage(text: string, isUserMessage: boolean = true, startCompletion: boolean = true, inputFromWebview: boolean = false) {
         // Show panel
         await vscode.commands.executeCommand('workbench.view.extension.promptrocket-container');
 
-        // Wait for webview to be ready
+        // Post user message then wait for webview to be ready
         await this._waitForWebviewReady();
+
+        if (text.startsWith('/')) {
+            await this._inputCommands(text, inputFromWebview);
+        }
+        else {
+            if (startCompletion) {
+                await this._returnMessage(text, inputFromWebview);
+            }
+        }
+
+        if (!inputFromWebview) {
+            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        }
+    }
+
+    private async _postMessage(text: string, isUserMessage: boolean = true, isNewMessage: boolean = true) {
         await this._view?.webview.postMessage({
             command: 'populateMessage',
             text: text,
             isUserMessage: isUserMessage,
             isNewMessage: false
         });
-
-        if (startCompletion) {
-            await this._returnMessage(text);
-        }
-
-        if (returnFocus) {
-            vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
-        }
     }
-
     private _waitForWebviewReady() {
         return new Promise((resolve) => {
             let checkWebviewInterval = setInterval(() => {
@@ -94,7 +114,8 @@ export class ChatView implements vscode.WebviewViewProvider {
             enableScripts: true,
             localResourceRoots: [this._context.extensionUri]
         };
-        this.startNewChat([], '');
+
+        this.startNewChat(this._messages, '');
 
         // if there are exisitng messages, send them to the webview
         if (this._messages.length > 0) {
@@ -107,7 +128,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             switch (message.command) {
                 case 'userMessage':
                     this._updateMessageArray(message.id);
-                    this._returnMessage(message.text);
+                    this.sendUserMessage(message.text, true, true, true);
                     break;
                 case 'copyToClipboard':
                     vscode.env.clipboard.writeText(message.text);
@@ -119,6 +140,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                     this._codeblockBuffer = message.text;
                     break;
                 case 'viewInitialized':
+                    console.log('view initialized');
                     this._populateWebview();
                     break;
                 case 'cancelStreaming':
@@ -146,12 +168,14 @@ export class ChatView implements vscode.WebviewViewProvider {
         // Should ignore first messages less than initialMessageLength
         this._setUsername();
         for (let i = this._initialMessageLength; i < this._messages.length; i++) {
-            this._view?.webview.postMessage({
-                command: 'populateMessage',
-                text: this._messages[i].content,
-                isUserMessage: this._messages[i].role === 'user',
-                isNewMessage: false
-            });
+            if (this._messages[i].role !== 'system') {
+                this._view?.webview.postMessage({
+                    command: 'populateMessage',
+                    text: this._messages[i].content,
+                    isUserMessage: this._messages[i].role === 'user',
+                    isNewMessage: false
+                });
+            }
         }
     }
 
@@ -181,7 +205,7 @@ export class ChatView implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _returnMessage(text: string) {
+    private async _returnMessage(text: string, inputFromWebview: boolean) {
         try {
             // preprocess messages 
             this._messages = message.preprocessMessages(this._messages);
@@ -219,6 +243,13 @@ export class ChatView implements vscode.WebviewViewProvider {
             const stream = await message.streamCompletion(p);
 
             let currentMessage = '';
+            // Add response to the message history
+            this._messages.push({
+                role: 'assistant',
+                content: currentMessage
+            });
+            this._saveMessages();
+
             let i = 0;
             stream.on('data', (chunk) => {
                 if (this._cancelToken) {
@@ -232,23 +263,26 @@ export class ChatView implements vscode.WebviewViewProvider {
                 });
                 i++;
                 currentMessage += chunk;
+                this._messages[this._messages.length - 1].content = currentMessage;
+                this._saveMessages();
             });
 
             stream.on('end', () => {
                 if (this._cancelToken) {
                     stream.removeAllListeners();
-                    return;
                 }
-                this._view?.webview.postMessage({
-                    command: "chatMessage",
-                    isCompletionEnd: true
-                });
+                else {
+                    this._view?.webview.postMessage({
+                        command: "chatMessage",
+                        isCompletionEnd: true
+                    });
+                }
 
-                // Add response to the message history
-                this._messages.push({
-                    role: 'assistant',
-                    content: currentMessage
-                });
+                // Message is sent from webview
+                if (inputFromWebview) {
+                    this._focusInputBox();
+                }
+
                 currentMessage = '';
             });
 
@@ -265,7 +299,7 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _getHtmlForWebview(webview: vscode.Webview): string {
         const userName = vscode.workspace.getConfiguration("promptrocket").get("userName", []);
         const assistantName = vscode.workspace.getConfiguration("promptrocket").get("assistantName", []);
-        const welcomeMessage = `Hello <b>${userName}</b>! How can I assist you today? 👩‍💻👨‍💻🚀`;
+        const welcomeMessage = `Welcome back ${userName}! How can I assist you today? 👩‍💻👨‍💻🚀`;
         const configuration = vscode.workspace.getConfiguration('editor');
         const fontSize = configuration.get('fontSize') as number;
         const lineHeight = configuration.get('lineHeight') as number;
@@ -310,7 +344,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             <div id="output-container">
                 <div id="message-list">
                     <div class="assistant-message-wrapper"> 
-                        <div class="sender-assistant"><span class="fa-solid fa-user-astronaut margin-right-5"></span><span>${assistantName}</span></div><div class="extension-message">
+                        <div class="sender-assistant"><span class="fa-solid fa-user-astronaut margin-right-5"></span><span>${assistantName}</span></div><div class="assistant-message">
                         <p>${welcomeMessage}</p>
                         </div>
                     </div>
@@ -318,7 +352,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             </div>
 
 	        <div id="input-container">
-                <textarea class="inputbox" id="user-input" rows="1" placeholder="What's on your mind?"></textarea>
+                <textarea class="inputbox" id="user-input" rows="1" placeholder="'/help' to see quick commands."></textarea>
                 <button class="button-overlap-inputbox" id="send-button">
                     <i class="fa-regular fa-paper-plane"></i>
                 </button>
@@ -327,5 +361,117 @@ export class ChatView implements vscode.WebviewViewProvider {
         <script src="${mainScript}"></script>
         </body>
         </html>`;
+    }
+
+    // Save message array to globalState
+    private _saveMessages() {
+        this._globalState.update('messages', this._messages);
+    }
+
+    // Load message array from globalState
+    private _loadMessages() {
+        this._messages = this._globalState.get('messages', []) as IMessage[];
+    }
+
+    private _focusInputBox() {
+        this._view?.webview.postMessage({
+            command: "focusInputBox"
+        });
+    }
+
+    private async _inputCommands(text: string, inputFromWebview: boolean = true) {
+        // Remove whitespace
+        text = text.trim();
+        const args = text.split(' ')[0];
+
+        if (text === '/clear') {
+            vscode.commands.executeCommand('promptrocket.newChat');
+        }
+        else if (text === '/model') {
+            const currentModel = this._config.get("useGPT4", false);
+            this._config.update("useGPT4", !currentModel, true);
+            const modelText = !currentModel ? "GPT-4" : "GPT-3";
+            await this._postMessage(`Switched model to ${modelText}.`, false, inputFromWebview);
+        }
+        else if (text === '/temp') {
+            const temp = args as unknown as number;
+            // check the args value is a number between 0 and 1
+            if (isNaN(temp) || temp < 0 || temp > 2) {
+                this._config.update("temperature", temp, true);
+                await this._postMessage(`Temperature must be a number between 0 and 2.`, false, inputFromWebview);
+            }
+            else {
+                await this._postMessage(`Changed temperature to ${temp}.`, false, inputFromWebview);
+            }
+        }
+        else if (text === '/topp') {
+            const topp = args as unknown as number;
+            // check the args value is a number between 0 and 1
+            if (isNaN(topp) || topp < 0 || topp > 1) {
+                this._config.update("top_p", topp, true);
+                await this._postMessage(`Top P must be a number between 0 and 1.`, false, inputFromWebview);
+            }
+            else {
+                await this._postMessage(`Changed Top P to ${topp}.`, false, inputFromWebview);
+            }
+        }
+
+        else if (text === '/presence') {
+            const presence = args as unknown as number;
+            if (isNaN(presence) || presence < -2 || presence > 2) {
+                this._config.update("presence_penalty", presence, true);
+                await this._postMessage(`Presence penalty must be a number between -2 and 2.`, false, inputFromWebview);
+            }
+            else {
+                await this._postMessage(`Changed presence penalty to ${presence}.`, false, inputFromWebview);
+            }
+        }
+        else if (text === '/freq') {
+            const freq = args as unknown as number;
+            if (isNaN(freq) || freq < 2 || freq > -2) {
+                this._config.update("frequency_penalty", freq, true);
+                await this._postMessage(`Frequency penalty must be a number between -2 and 2.`, false, inputFromWebview);
+            }
+            else {
+                await this._postMessage(`Changed frequency penalty to ${freq}.`, false, inputFromWebview);
+            }
+        }
+        else if (text === '/buffer') {
+            if (this._codeblockBuffer) {
+                await this._postMessage(`\`\`\`buffer ${this._codeblockBuffer}\`\`\``, false, inputFromWebview);
+            }
+            else {
+                await this._postMessage("Buffer is empty.", false, inputFromWebview);
+            }
+        }
+        else if (text === '/insert') {
+            if (this._codeblockBuffer) {
+                vscode.commands.executeCommand('promptrocket.insertLastCodeblock');
+            }
+            else {
+                await this._postMessage("Buffer is empty.", false, inputFromWebview);
+            }
+        }
+        else if (text === '/help') {
+            let helpText = 'Here are your quick commands 🚀: <br><br>';
+            helpText += "/clear: Start a new chat<br>";
+            helpText += "/model: Switch between GPT-3 and GPT-4<br>";
+            helpText += "/temp: Set temperature (0-2)<br>";
+            helpText += "/topp: Set top P (0-1)<br>";
+            helpText += "/presence: Set presence penalty (-2-2)<br>";
+            helpText += "/freq: Set frequency penalty (-2-2)<br>";
+            helpText += "/buffer: Shows current code block buffer ready to be inserted into editor.<br>";
+            helpText += "/insert: Insert the last codeblock.<br>";
+            helpText += "/help: Show this help message.";
+
+            await this._postMessage(helpText, false, inputFromWebview);
+        }
+        else {
+            await this._postMessage("Unknown command. Type /help for a list of commands.", false, inputFromWebview);
+        }
+
+        if (inputFromWebview) {
+            this._focusInputBox();
+        }
     }
 }

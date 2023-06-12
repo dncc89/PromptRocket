@@ -53,7 +53,7 @@ app {
     padding: 10px 0px 10px 0px;
     box-sizing: border-box;
     background: var(--vscode-sidebar-background);
-    border-top: 1px solid var(--vscode-chat-requestBorder);
+    border-top: 1px solid var(--vscode-activityBar-border);
 }
 
 #message-list {
@@ -67,29 +67,38 @@ app {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
+    align-items: flex-start;
 }
 
 .assistant-message-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     margin-bottom: 15px;
 }
 
 .sender-user {
-    color: var(--vscode-gitDecoration-modifiedResourceForeground);
+    color: var(--vscode-symbolIcon-constructorForeground);
     font-weight: bold;
     margin-bottom: 5px;
 }
 
 .sender-assistant {
-    color: var(--vscode-gitDecoration-untrackedResourceForeground);
+    color: var(--vscode-symbolIcon-classForeground);
     font-weight: bold;
     margin-bottom: 5px;
 }
 
 .user-message {
-    line-break: anywhere;
-    color: var(--vscode-input-foreground);
     font-style: italic;
 }
+
+.user-message:hover {
+    text-decoration: line-through;
+}
+
+.assistant-message {}
+
 
 .margin-right-5 {
     margin-right: 5px;
@@ -101,14 +110,6 @@ app {
 
 .margin-left-auto {
     margin-left: auto;
-}
-
-.user-message:hover {
-    text-decoration: line-through;
-}
-
-.extension-message {
-    /* color: var(--vscode-input-foreground); */
 }
 
 .inputbox {
@@ -268,6 +269,7 @@ pre {
     padding: 10px 10px 5px 10px;
     margin: 0px;
     border-radius: 3px;
+    background: var(--vscode-editor-background);
 }
 
 hr {
@@ -278,17 +280,18 @@ code {
     font-family: var(--vscode-editor-font-family);
     font-weight: var(--vscode-editor-font-weight);
     font-size: var(--vscode-editor-font-size);
-    color: var(--vscode-symbolIcon-colorForeground);
+    background: var(--vscode-editor-background);
+    color: var(--vscode-editor-textForeground);
 }
 
 blockquote {
     padding: 10px;
     margin: 10px 0px;
-    background: transparent;
+    background: var(--vscode-editor-background);
     border: solid;
     border-color: var(--vscode-editor-background);
     font-family: var(--vscode-editor-font-family);
     font-weight: var(--vscode-editor-font-weight);
     font-size: var(--vscode-editor-font-size);
-    color: var(--vscode-editor-foreground);
+    color: var(--vscode-editor-textForeground);
 }

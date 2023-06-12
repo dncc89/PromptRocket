@@ -157,6 +157,9 @@ function handleMessage(event) {
         case 'setAssistantName':
             assistantname = message.name;
             break;
+        case 'focusInputBox':
+            userInput.focus();
+            break;
         case 'chatMessage':
             if (message.isNewMessage && !message.isUserMessage) {
                 isStreaming = true;
@@ -204,7 +207,7 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
         //append new one to message
         id = messages.push(document.createElement('div')) - 1;
         wrappers.push(currentWrapper);
-        messages[id].className = isUserMessage ? 'user-message' : 'extension-message';
+        messages[id].className = isUserMessage ? 'user-message' : 'assistant-message';
     }
 
     currentText += text;

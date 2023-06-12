@@ -391,7 +391,7 @@ export class ChatView implements vscode.WebviewViewProvider {
         else if (cmd === '/model') {
             const currentModel = this._config.get("useGPT4", false);
             this._config.update("useGPT4", !currentModel, true);
-            const modelText = !currentModel ? "GPT-4" : "GPT-3";
+            const modelText = currentModel ? "GPT-4" : "GPT-3.5-turbo";
             await this._postMessage(`Switched model to ${modelText}.`, false, inputFromWebview);
         }
         else if (cmd === '/temp') {

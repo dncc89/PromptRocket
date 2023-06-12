@@ -381,19 +381,20 @@ export class ChatView implements vscode.WebviewViewProvider {
 
     private async _inputCommands(text: string, inputFromWebview: boolean = true) {
         // Remove whitespace
-        text = text.trim();
-        const args = text.split(' ')[0];
+        const split = text.trim().split(' ');
+        const cmd = split[0];
+        const args = split[1];
 
-        if (text === '/clear') {
+        if (cmd === '/clear') {
             vscode.commands.executeCommand('promptrocket.newChat');
         }
-        else if (text === '/model') {
+        else if (cmd === '/model') {
             const currentModel = this._config.get("useGPT4", false);
             this._config.update("useGPT4", !currentModel, true);
             const modelText = !currentModel ? "GPT-4" : "GPT-3";
             await this._postMessage(`Switched model to ${modelText}.`, false, inputFromWebview);
         }
-        else if (text === '/temp') {
+        else if (cmd === '/temp') {
             const temp = args as unknown as number;
             // check the args value is a number between 0 and 1
             if (isNaN(temp) || temp < 0 || temp > 2) {
@@ -404,7 +405,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 await this._postMessage(`Changed temperature to ${temp}.`, false, inputFromWebview);
             }
         }
-        else if (text === '/topp') {
+        else if (cmd === '/topp') {
             const topp = args as unknown as number;
             // check the args value is a number between 0 and 1
             if (isNaN(topp) || topp < 0 || topp > 1) {
@@ -416,7 +417,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             }
         }
 
-        else if (text === '/presence') {
+        else if (cmd === '/presence') {
             const presence = args as unknown as number;
             if (isNaN(presence) || presence < -2 || presence > 2) {
                 this._config.update("presence_penalty", presence, true);
@@ -426,7 +427,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 await this._postMessage(`Changed presence penalty to ${presence}.`, false, inputFromWebview);
             }
         }
-        else if (text === '/freq') {
+        else if (cmd === '/freq') {
             const freq = args as unknown as number;
             if (isNaN(freq) || freq < 2 || freq > -2) {
                 this._config.update("frequency_penalty", freq, true);
@@ -436,7 +437,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 await this._postMessage(`Changed frequency penalty to ${freq}.`, false, inputFromWebview);
             }
         }
-        else if (text === '/buffer') {
+        else if (cmd === '/buffer') {
             if (this._codeblockBuffer) {
                 await this._postMessage(`\`\`\`buffer ${this._codeblockBuffer}\`\`\``, false, inputFromWebview);
             }
@@ -444,7 +445,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 await this._postMessage("Buffer is empty.", false, inputFromWebview);
             }
         }
-        else if (text === '/insert') {
+        else if (cmd === '/insert') {
             if (this._codeblockBuffer) {
                 vscode.commands.executeCommand('promptrocket.insertLastCodeblock');
             }
@@ -452,7 +453,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 await this._postMessage("Buffer is empty.", false, inputFromWebview);
             }
         }
-        else if (text === '/help') {
+        else if (cmd === '/help') {
             let helpText = 'Here are your quick commands 🚀: <br><br>';
             helpText += "/clear: Start a new chat<br>";
             helpText += "/model: Switch between GPT-3 and GPT-4<br>";

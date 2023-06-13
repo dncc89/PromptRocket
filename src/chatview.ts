@@ -71,10 +71,20 @@ export class ChatView implements vscode.WebviewViewProvider {
         // Post user message then wait for webview to be ready
         await this._waitForWebviewReady();
 
+
         if (text.startsWith('/')) {
+            this._postSystemMessage(text, isUserMessage);
+
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(null);
+                }, 500);
+            });
+
             await this._inputCommands(text, inputFromWebview);
         }
         else {
+            this._postMessage(text, isUserMessage);
             if (startCompletion) {
                 await this._returnMessage(text, inputFromWebview);
             }
@@ -85,14 +95,26 @@ export class ChatView implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _postMessage(text: string, isUserMessage: boolean = true, isNewMessage: boolean = true) {
+    private async _postMessage(text: string, isUserMessage: boolean = true) {
         await this._view?.webview.postMessage({
             command: 'populateMessage',
             text: text,
             isUserMessage: isUserMessage,
-            isNewMessage: false
+            isNewMessage: false,
+            isSystemMessage: false
         });
     }
+
+    private async _postSystemMessage(text: string, isUserMessage: boolean = true) {
+        await this._view?.webview.postMessage({
+            command: 'populateMessage',
+            text: text,
+            isUserMessage: isUserMessage,
+            isNewMessage: false,
+            isSystemMessage: true
+        });
+    }
+
     private _waitForWebviewReady() {
         return new Promise((resolve) => {
             let checkWebviewInterval = setInterval(() => {
@@ -116,6 +138,7 @@ export class ChatView implements vscode.WebviewViewProvider {
         };
 
         this.startNewChat(this._messages, '');
+        this._view.webview.postMessage({ command: 'setModel', text: this._config.get('useGPT4') ? 'GPT-4' : 'GPT-3.5-Turbo' });
 
         // if there are exisitng messages, send them to the webview
         if (this._messages.length > 0) {
@@ -339,8 +362,6 @@ export class ChatView implements vscode.WebviewViewProvider {
         <body>
         <app>
             <script src="${marked}"></script>
-            <div id="header-bar">
-            </div>
             <div id="output-container">
                 <div id="message-list">
                     <div class="assistant-message-wrapper"> 
@@ -350,7 +371,11 @@ export class ChatView implements vscode.WebviewViewProvider {
                     </div>
                 </div>
             </div>
-
+            <div id="model-bar">
+                <div class="model-text">
+                Model: GPT-3.5-Turbo
+                </div>
+            </div>
 	        <div id="input-container">
                 <textarea class="inputbox" id="user-input" rows="1" placeholder="'/help' to see quick commands."></textarea>
                 <button class="button-overlap-inputbox" id="send-button">
@@ -385,72 +410,79 @@ export class ChatView implements vscode.WebviewViewProvider {
         const cmd = split[0];
         const args = split[1];
 
+        // Update
+        this._config = vscode.workspace.getConfiguration("promptrocket");
+
         if (cmd === '/clear') {
             vscode.commands.executeCommand('promptrocket.newChat');
         }
         else if (cmd === '/model') {
             const currentModel = this._config.get("useGPT4", false);
             this._config.update("useGPT4", !currentModel, true);
-            const modelText = currentModel ? "GPT-4" : "GPT-3.5-turbo";
-            await this._postMessage(`Switched model to ${modelText}.`, false, inputFromWebview);
+            const modelText = currentModel ? "GPT-3.5-Turbo" : "GPT-4";
+            await this._postSystemMessage(`Switched model to ${modelText}.`, false);
+            this._view?.webview.postMessage({ command: 'setModel', text: modelText });
+
         }
         else if (cmd === '/temp') {
             const temp = args as unknown as number;
-            // check the args value is a number between 0 and 1
+            const oldValue = this._config.get("temperature", 1);
             if (isNaN(temp) || temp < 0 || temp > 2) {
                 this._config.update("temperature", temp, true);
-                await this._postMessage(`Temperature must be a number between 0 and 2.`, false, inputFromWebview);
+                await this._postSystemMessage(`Temperature must be a number between 0 and 2.`, false);
             }
             else {
-                await this._postMessage(`Changed temperature to ${temp}.`, false, inputFromWebview);
+                await this._postSystemMessage(`Changed temperature ${oldValue} -> ${temp}.`, false);
             }
         }
         else if (cmd === '/topp') {
             const topp = args as unknown as number;
-            // check the args value is a number between 0 and 1
+            const oldValue = this._config.get("top_p", 1);
             if (isNaN(topp) || topp < 0 || topp > 1) {
                 this._config.update("top_p", topp, true);
-                await this._postMessage(`Top P must be a number between 0 and 1.`, false, inputFromWebview);
+                await this._postSystemMessage(`Top P must be a number between 0 and 1.`, false);
             }
             else {
-                await this._postMessage(`Changed Top P to ${topp}.`, false, inputFromWebview);
+                await this._postSystemMessage(`Changed Top P ${oldValue} -> ${topp}.`, false);
             }
         }
 
         else if (cmd === '/presence') {
             const presence = args as unknown as number;
+            const oldValue = this._config.get("presence_penalty", 0);
             if (isNaN(presence) || presence < -2 || presence > 2) {
                 this._config.update("presence_penalty", presence, true);
-                await this._postMessage(`Presence penalty must be a number between -2 and 2.`, false, inputFromWebview);
+                await this._postSystemMessage(`Presence penalty must be a number between -2 and 2.`, false);
             }
             else {
-                await this._postMessage(`Changed presence penalty to ${presence}.`, false, inputFromWebview);
+                await this._postSystemMessage(`Changed presence penalty ${oldValue} -> ${presence}.`, false);
             }
         }
         else if (cmd === '/freq') {
             const freq = args as unknown as number;
+            const oldValue = this._config.get("frequency_penalty", 0);
             if (isNaN(freq) || freq < 2 || freq > -2) {
                 this._config.update("frequency_penalty", freq, true);
-                await this._postMessage(`Frequency penalty must be a number between -2 and 2.`, false, inputFromWebview);
+                await this._postSystemMessage(`Frequency penalty must be a number between -2 and 2.`, false);
             }
             else {
-                await this._postMessage(`Changed frequency penalty to ${freq}.`, false, inputFromWebview);
+                await this._postSystemMessage(`Changed frequency penalty ${oldValue} -> ${freq}.`, false);
             }
         }
         else if (cmd === '/buffer') {
             if (this._codeblockBuffer) {
-                await this._postMessage(`\`\`\`buffer ${this._codeblockBuffer}\`\`\``, false, inputFromWebview);
+                await this._postSystemMessage(`\`\`\`buffer ${this._codeblockBuffer}\`\`\``, false);
             }
             else {
-                await this._postMessage("Buffer is empty.", false, inputFromWebview);
+                await this._postSystemMessage("Buffer is empty.", false);
             }
         }
         else if (cmd === '/insert') {
             if (this._codeblockBuffer) {
-                vscode.commands.executeCommand('promptrocket.insertLastCodeblock');
+                vscode.commands.executeCommand('promptrocket.insertLastCodeblock', false);
             }
             else {
-                await this._postMessage("Buffer is empty.", false, inputFromWebview);
+                await this._postSystemMessage("Buffer is empty.", false);
             }
         }
         else if (cmd === '/help') {
@@ -465,10 +497,10 @@ export class ChatView implements vscode.WebviewViewProvider {
             helpText += "/insert: Insert the last codeblock.<br>";
             helpText += "/help: Show this help message.";
 
-            await this._postMessage(helpText, false, inputFromWebview);
+            await this._postSystemMessage(helpText, false);
         }
         else {
-            await this._postMessage("Unknown command. Type /help for a list of commands.", false, inputFromWebview);
+            await this._postSystemMessage("Unknown command. Type /help for a list of commands.", false);
         }
 
         if (inputFromWebview) {

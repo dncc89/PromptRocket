@@ -110,7 +110,7 @@ sendButton.addEventListener('click', () => {
     }
     else {
         if (userInput.value) {
-            displayMessage(userInput.value, isUserMessage = true);
+            // displayMessage(userInput.value, isUserMessage = true);
             vscode.postMessage({
                 command: 'userMessage',
                 id: messages.length,
@@ -164,27 +164,29 @@ function handleMessage(event) {
             if (message.isNewMessage && !message.isUserMessage) {
                 isStreaming = true;
             }
-
             if (message.isCompletionEnd) {
                 isStreaming = false;
                 currentWrapper = null;  // close the current wrapper
                 currentText = '';
             } else {
-                displayMessage(message.text, message.isUserMessage, message.isNewMessage);
+                displayMessage(message.text, message.isUserMessage, message.isNewMessage, false);
             }
-
             updateTextareaState();
             break;
         case 'populateMessage':
-            displayMessage(message.text, message.isUserMessage);
+            displayMessage(message.text, message.isUserMessage, false, message.isSystemMessage);
             currentWrapper = null;
             currentText = '';
+            break;
+        case 'setModel':
+            setModelName(message.text);
+            break;
     }
     bindCodeButtonEvents();
 }
 
 
-function displayMessage(text, isUserMessage, isNewMessage = false) {
+function displayMessage(text, isUserMessage, isNewMessage = false, isSystemMessage = false) {
     if (isUserMessage || isNewMessage || !currentWrapper) {
         currentWrapper = document.createElement('div');
         currentWrapper.className = isUserMessage ? 'user-message-wrapper' : 'assistant-message-wrapper';
@@ -199,8 +201,15 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
         userIcon.classList.add('fa-regular', 'fa-user', 'margin-right-5');
         let assistantIcon = document.createElement('span');
         assistantIcon.classList.add('fa-solid', 'fa-user-astronaut', 'margin-right-5');
+        let systemIcon = document.createElement('span');
+        systemIcon.classList.add('fa-solid', 'fa-wand-magic-sparkles', 'margin-right-5');
 
-        sender.appendChild(isUserMessage ? userIcon : assistantIcon);
+        if (isSystemMessage) {
+            sender.appendChild(systemIcon);
+        }
+        else {
+            sender.appendChild(isUserMessage ? userIcon : assistantIcon);
+        }
         sender.appendChild(usernameText);
         currentWrapper.appendChild(sender);
         messageList.appendChild(currentWrapper);
@@ -208,6 +217,12 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
         id = messages.push(document.createElement('div')) - 1;
         wrappers.push(currentWrapper);
         messages[id].className = isUserMessage ? 'user-message' : 'assistant-message';
+
+        if (isSystemMessage) {
+            usernameText.textContent += ' (system)';
+            sender.classList.add('system-message', 'system-message-fade');
+            messages[id].classList.add('system-message', 'system-message-fade');
+        }
     }
 
     currentText += text;
@@ -217,6 +232,7 @@ function displayMessage(text, isUserMessage, isNewMessage = false) {
         messages[id].innerHTML = marked.parse(currentText, { renderer });
 
     currentWrapper.appendChild(messages[id]);
+
 
     // clickable message
     if (isUserMessage) {
@@ -389,4 +405,10 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), wait);
     };
+}
+
+function setModelName(modelName) {
+    const headerBar = document.querySelector('#model-bar');
+    const modelText = headerBar.querySelector('.model-text');
+    modelText.textContent = 'Model: ' + modelName;
 }

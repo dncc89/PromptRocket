@@ -33,11 +33,17 @@ app {
     height: 100%;
 }
 
-#header-bar {
+#model-bar {
     display: flex;
     flex-direction: row;
-    justify-content: right;
+    justify-content: left;
     padding: 10px 0px 10px 0px;
+    border-top: 1px solid var(--vscode-activityBar-border);
+}
+
+.model-text {
+    color: var(--vscode-symbolIcon-enumMemberForeground);
+    margin-left: 10px;
 }
 
 #output-container {
@@ -67,14 +73,14 @@ app {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
-    align-items: flex-start;
+    opacity: 1;
 }
 
 .assistant-message-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     margin-bottom: 15px;
+    opacity: 1;
 }
 
 .sender-user {
@@ -89,15 +95,22 @@ app {
     margin-bottom: 5px;
 }
 
-.user-message {
+.system-message {
+    color: var(--vscode-symbolIcon-enumMemberForeground);
     font-style: italic;
+}
+
+.user-message {
+    line-break: auto;
 }
 
 .user-message:hover {
     text-decoration: line-through;
 }
 
-.assistant-message {}
+.assistant-message {
+    line-break: auto;
+}
 
 
 .margin-right-5 {
@@ -294,4 +307,23 @@ blockquote {
     font-weight: var(--vscode-editor-font-weight);
     font-size: var(--vscode-editor-font-size);
     color: var(--vscode-editor-textForeground);
+}
+
+/* Define the fade-out keyframe animation */
+@keyframes system-message-fade {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+/* Apply the animation to the element */
+.system-message-fade {
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+    animation-name: system-message-fade;
+    animation-timing-function: ease-in;
 }

@@ -136,12 +136,13 @@ app {
     outline: none;
     overflow: hidden;
     resize: none;
-    font-family: sans-serif;
     box-sizing: border-box;
     min-width: 200px;
     -ms-overflow-style: none;
     scrollbar-width: none;
     border-radius: 4px;
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
 }
 
 .inputbox::-webkit-scrollbar {

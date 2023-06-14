@@ -8,7 +8,7 @@ const { TextDecoder } = require("util");
 const { Writable } = require("stream");
 const fetch = require("cross-fetch");
 
-export const streamCompletion = (payload: any) => {
+export const streamCompletion = (payload: any, isFunction: boolean = false) => {
     const emitter = new EventEmitter();
 
     fetch("https://api.openai.com/v1/chat/completions", payload)
@@ -23,13 +23,14 @@ export const streamCompletion = (payload: any) => {
             const writable = new Writable({
                 write(chunk: any, encoding: any, callback: any) {
                     buffer += textDecoder.decode(chunk, { stream: true });
-                    processBuffer();
+                    isFunction ? processFunctionBuffer() : processBuffer();
                     callback();
                 }
             });
 
             const processBuffer = () => {
                 while (true) {
+                    console.log(buffer);
                     const newlineIndex = buffer.indexOf("\n");
                     if (newlineIndex === -1) {
                         break;
@@ -54,6 +55,38 @@ export const streamCompletion = (payload: any) => {
                     }
 
                     const newContent = jsonData.choices[0].delta.content;
+                    emitter.emit('data', newContent);
+                }
+            };
+
+            const processFunctionBuffer = () => {
+                console.log(buffer);
+                while (true) {
+                    const newlineIndex = buffer.indexOf("\n");
+                    if (newlineIndex === -1) {
+                        break;
+                    }
+
+                    const line = buffer.slice(0, newlineIndex);
+                    buffer = buffer.slice(newlineIndex + 1);
+
+                    if (!line.startsWith("data:")) {
+                        continue;
+                    }
+
+                    const jsonData = JSON.parse(line.slice(5));
+
+                    if (jsonData.choices[0].finish_reason === 'function_call') {
+                        writable.end();
+                        break;
+                    }
+
+                    if (!jsonData.choices[0].delta.function_call.arguments) {
+                        continue;
+                    }
+
+
+                    const newContent = jsonData.choices[0].delta.function_call.arguments;
                     emitter.emit('data', newContent);
                 }
             };

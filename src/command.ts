@@ -28,22 +28,39 @@ export class Command {
             });
         }
 
-        const p = payload.generatePayload(this._messages, this._apiKey);
-        const stream = await message.streamCompletion(p);
+        const cmd = [
+            {
+                "name": "write",
+                "description": "Write requested code or text into editor",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "Requested code or text, e.g. print('Hello World!')"
+                        },
+                    },
+                    "required": ["text"],
+                },
+            }
+        ];
+
+        const p = payload.generatePayload(this._messages, this._apiKey, cmd);
+        const stream = await message.streamCompletion(p, true);
         let text = '';
 
         stream.on('data', (data) => {
             text += data;
             let shortMsg = text.slice(-10);
-            const progressMessage = `Thinking: ${shortMsg}`;
+            const progressMessage = `${shortMsg}`;
             vscode.window.setStatusBarMessage(progressMessage, 1000);
         });
 
         stream.on('end', () => {
             vscode.window.setStatusBarMessage('');
-
+            const jsonData = JSON.parse(text);
             editor.edit((editBuilder) => {
-                editBuilder.insert(editor.selection.active, text);
+                editBuilder.insert(editor.selection.active, jsonData.text);
             });
         });
 

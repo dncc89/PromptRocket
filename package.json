@@ -265,7 +265,7 @@
               "prompts": [
                 {
                   "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Perform the requested task, then only return the required text."
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Modify the code based on the given context."
                 },
                 {
                   "role": "user",
@@ -281,7 +281,7 @@
                 },
                 {
                   "role": "user",
-                  "content": "Please complete the code between the context. Reply only the new code."
+                  "content": "Please write the code goes between the context."
                 }
               ]
             },
@@ -291,11 +291,11 @@
               "prompts": [
                 {
                   "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. You will wrie a requested code and only return that."
+                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Write a code snippet based on the given context."
                 },
                 {
                   "role": "user",
-                  "content": "We're using {{language}}. Please write a code based on this request and only return the code: ```{{argument}}```"
+                  "content": "Language: {{language}} \nRequest: {{argument}}"
                 }
               ]
             },
@@ -305,27 +305,11 @@
               "prompts": [
                 {
                   "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Return a comment string about the given code."
+                  "content": "You are the most powerful code analyzer."
                 },
                 {
                   "role": "user",
-                  "content": "```javascript console.log('Hello World!');```"
-                },
-                {
-                  "role": "assistant",
-                  "content": "// Write Hello World! to the console"
-                },
-                {
-                  "role": "user",
-                  "content": "That was perfect! Here's another one: ```python def generate_fibonacci(n): if n <= 1: return n else: return(generate_fibonacci(n-1) + generate_fibonacci(n-2))```"
-                },
-                {
-                  "role": "assistant",
-                  "content": "# Generate the nth Fibonacci number"
-                },
-                {
-                  "role": "user",
-                  "content": "That was perfect! Here's another one: \\n```{{language}} {{context_after}}```"
+                  "content": "Write a comment for this code: ```{{language}} {{context_after}}```"
                 }
               ]
             }
@@ -370,6 +354,7 @@
     "data-uri-to-buffer": "^5.0.1",
     "jsonlint": "^1.6.3",
     "node-fetch": "^2.6.11",
+    "openai": "^3.3.0",
     "stream": "^0.0.2"
   },
   "repository": {

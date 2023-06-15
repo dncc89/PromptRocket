@@ -115,10 +115,15 @@
           "default": "PromptRocket",
           "description": "AI's name in the chat."
         },
-        "promptrocket.useGPT4": {
-          "type": "boolean",
-          "default": false,
-          "description": "Use GPT-4"
+        "promptrocket.model": {
+          "type": "string",
+          "default": "GPT-3.5-turbo-0613",
+          "description": "Select model",
+          "enum": [
+            "GPT-3.5-turbo-0613",
+            "GPT-3.5-turbo-16k-0613",
+            "GPT-4-0613"
+          ]
         },
         "promptrocket.temperatrue": {
           "type": "number",

@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { ICommand, IMessage } from './interfaces';
 
 import { ChatView } from './chatview';
-import { Command } from './command';
+import { EditorCommand } from './editorCommand';
 
 export async function activate(context: vscode.ExtensionContext) {
     // Check if API key is set
@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Create chat view
     let chatview = new ChatView(context, apiKey);
-    let command = new Command(context, apiKey);
+    let command = new EditorCommand(context, apiKey);
 
     let disposableNewChat = vscode.commands.registerCommand("promptrocket.newChat", async () => {
         chatview.startNewChat([], '');

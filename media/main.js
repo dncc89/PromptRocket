@@ -3,6 +3,7 @@ const messageList = document.getElementById('message-list');
 const outputContainer = document.getElementById('output-container');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const modelDropdown = document.getElementById('model-select');
 const thinkingTexts = ['Thinking.', 'Thinking..', 'Thinking...', 'Thinking....', 'Thinking.....'];
 let inputPlaceholder = '';
 let counter = 0;
@@ -121,6 +122,11 @@ sendButton.addEventListener('click', () => {
     }
 });
 
+modelDropdown.addEventListener('change', function (event) {
+    const selectedModel = modelDropdown.options[modelDropdown.selectedIndex].text;
+    vscode.postMessage({ command: 'changeModel', text: selectedModel });
+});
+
 window.addEventListener('message', handleMessage);
 window.addEventListener('blur', function () {
     document.body.classList.add('inactive-selection');
@@ -179,7 +185,7 @@ function handleMessage(event) {
             currentText = '';
             break;
         case 'setModel':
-            setModelName(message.text);
+            // setModelName(message.text);
             break;
     }
     bindCodeButtonEvents();
@@ -226,10 +232,12 @@ function displayMessage(text, isUserMessage, isNewMessage = false, isSystemMessa
     }
 
     currentText += text;
-    if (isUserMessage)
+    if (isUserMessage) {
         messages[id].textContent = currentText;
-    else
+    }
+    else {
         messages[id].innerHTML = marked.parse(currentText, { renderer });
+    }
 
     currentWrapper.appendChild(messages[id]);
 
@@ -408,7 +416,6 @@ function debounce(func, wait) {
 }
 
 function setModelName(modelName) {
-    const headerBar = document.querySelector('#model-bar');
-    const modelText = headerBar.querySelector('.model-text');
-    modelText.textContent = 'Model: ' + modelName;
+    modelDropdown.textContent = modelName;
 }
+

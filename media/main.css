@@ -37,13 +37,23 @@ app {
     display: flex;
     flex-direction: row;
     justify-content: left;
-    padding: 10px 0px 10px 0px;
     border-top: 1px solid var(--vscode-activityBar-border);
 }
 
-.model-text {
+select {
+    margin: 10px 10px 5px 10px;
+    padding: 5px 0px 5px 0px;
+    flex: 1;
+    background: var(--vscode-dropdown-background);
     color: var(--vscode-symbolIcon-enumMemberForeground);
-    margin-left: 10px;
+    border: 1px solid var(--vscode-dropdown-background);
+    border-radius: 4px;
+    outline: 0;
+}
+
+select:focus {
+    outline: 0;
+    border: 1px solid var(--vscode-dropdown-background);
 }
 
 #output-container {
@@ -56,10 +66,10 @@ app {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    padding: 10px 0px 10px 0px;
+    padding: 0px 0px 10px 0px;
     box-sizing: border-box;
     background: var(--vscode-sidebar-background);
-    border-top: 1px solid var(--vscode-activityBar-border);
+    /* border-top: 1px solid var(--vscode-activityBar-border); */
 }
 
 #message-list {
@@ -137,7 +147,6 @@ app {
     overflow: hidden;
     resize: none;
     box-sizing: border-box;
-    min-width: 200px;
     -ms-overflow-style: none;
     scrollbar-width: none;
     border-radius: 4px;

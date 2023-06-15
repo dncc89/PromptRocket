@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import { IMessage } from './interfaces';
 
-export class Command {
+export class EditorCommand {
     private _apiKey: string;
     private _messages: IMessage[] = [];
 

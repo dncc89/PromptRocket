@@ -20,6 +20,7 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _globalState: vscode.Memento;
     private _cancelToken = false;
     private _firstLaunch = true;
+    private _currentLoop: number = 0;
     private _inputCommand?: InputCommand;
 
     constructor(context: vscode.ExtensionContext, apiKey: string) {
@@ -90,7 +91,8 @@ export class ChatView implements vscode.WebviewViewProvider {
         else {
             this._postMessage(text, 'user');
             if (startCompletion) {
-                await this._returnMessage(text, inputFromWebview);
+                this._currentLoop = 0;
+                await this._returnMessage(text, 'user', inputFromWebview);
             }
         }
 
@@ -217,37 +219,40 @@ export class ChatView implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _returnMessage(text: string, inputFromWebview: boolean) {
+    private async _returnMessage(text: string, requester: string, inputFromWebview: boolean) {
         try {
+            if (this._currentLoop > 3) {
+                return;
+            }
+
             // preprocess messages 
             this._messages = message.preprocessMessages(this._messages);
             this._cancelToken = false;
 
-            // If id is empty, it means the user is sending a new message from a template
-            // In this case context is handled in preprocessMessages 
-            if (text === '') {
-                const length = this._messages.length - 1;
-                this._postMessage(this._messages[length].content || '', 'user');
-            }
-            else {
-                // grab text selection and compare what's stored in the variable
-                const selection = utils.getContext()[1];
-                let context = `Context:\`\`\`${selection}\`\`\`\n`;
-                if (selection === '' || selection === this._textSelection) {
-                    context = '';
-                }
+            const requestMessage: IMessage = {
+                role: requester,
+                content: text,
+            };
+            this._messages.push(requestMessage);
 
-                this._textSelection = selection;
+            const cmd = [
+                {
+                    "name": "get_document_context",
+                    "description": "Get document context for current file, including what user is focusing on",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "lines": {
+                                "type": "number",
+                                "description": "Lines of context around what user is seeing, range 5-20",
+                            },
+                        },
+                        "required": ["lines"],
+                    },
+                },
+            ];
 
-                const userMessage: IMessage = {
-                    role: 'user',
-                    hiddenContext: context,
-                    content: text,
-                };
-                this._messages.push(userMessage);
-            }
-
-            const p = payload.generatePayload(this._messages, this._apiKey);
+            const p = payload.generatePayload(this._messages, this._apiKey, cmd);
             const stream = await message.streamCompletion(p);
 
             // Initialize a new message with empty content
@@ -259,21 +264,23 @@ export class ChatView implements vscode.WebviewViewProvider {
             this._saveMessages();
 
             let i = 0;
+            let funcName = 'chat';
             stream.on('data', (chunk) => {
-                if (this._cancelToken) {
-                    stream.removeAllListeners();
-                    return;
-                }
+                funcName = chunk[0];
                 this._view?.webview.postMessage({
                     command: 'chatStreaming',
-                    text: chunk,
+                    text: chunk[1],
                     sender: 'assistant',
                     isNewMessage: i === 0
                 });
                 i++;
-                currentMessage += chunk;
                 this._messages[this._messages.length - 1].content = currentMessage;
                 this._saveMessages();
+                currentMessage += chunk[1];
+                if (this._cancelToken) {
+                    stream.removeAllListeners();
+                    return;
+                }
             });
 
             stream.on('end', () => {
@@ -282,11 +289,15 @@ export class ChatView implements vscode.WebviewViewProvider {
                     isCompletionEnd: true
                 });
                 // Message is sent from webview, return the focus
-                if (inputFromWebview) {
-                    this._focusInputBox();
+                this._focusInputBox();
+
+                if (funcName !== 'chat') {
+                    // Parse the function call and return the result to streamcompletion
+                    this._handleFunctions(funcName, currentMessage);
                 }
                 // Reset the current message for the next message
                 currentMessage = '';
+                this._currentLoop++;
             });
 
             stream.on('error', (error) => {
@@ -295,6 +306,23 @@ export class ChatView implements vscode.WebviewViewProvider {
 
         } catch (error) {
             console.error(`Error while sending message: ${error}`);
+        }
+    }
+
+    private _handleFunctions(funcName: string, request: any) {
+        switch (funcName) {
+            case 'get_document_context':
+                const lines = utils.getContext();
+                const context = JSON.stringify({
+                    "file_language": utils.getLanguageID(),
+                    "context_before": lines[0],
+                    "context_after": lines[2],
+                    "text_selection": lines[1],
+                });
+
+                this._postMessage(`\`\`\`${funcName} ${context}\`\`\``, 'function');
+                this._returnMessage(context, 'function', false);
+                break;
         }
     }
 

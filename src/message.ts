@@ -8,7 +8,7 @@ const { TextDecoder } = require("util");
 const { Writable } = require("stream");
 const fetch = require("cross-fetch");
 
-export const streamCompletion = (payload: any, isFunction: boolean = false) => {
+export const streamCompletion = (payload: any) => {
     const emitter = new EventEmitter();
 
     fetch("https://api.openai.com/v1/chat/completions", payload)
@@ -18,12 +18,13 @@ export const streamCompletion = (payload: any, isFunction: boolean = false) => {
             }
 
             let buffer = "";
+            let funcName = "";
             const textDecoder = new TextDecoder();
 
             const writable = new Writable({
                 write(chunk: any, encoding: any, callback: any) {
                     buffer += textDecoder.decode(chunk, { stream: true });
-                    isFunction ? processFunctionBuffer() : processBuffer();
+                    processBuffer();
                     callback();
                 }
             });
@@ -48,44 +49,22 @@ export const streamCompletion = (payload: any, isFunction: boolean = false) => {
                     }
 
                     const jsonData = JSON.parse(line.slice(5));
+                    const content = jsonData.choices[0].delta.content;
+                    const argument = jsonData.choices[0].delta.function_call?.arguments;
+                    const name = jsonData.choices[0].delta.function_call?.name;
+                    if (name?.length > 0) {
+                        funcName = name;
+                    }
 
-                    if (!jsonData.choices[0].delta.content) {
+                    if (!content && !argument) {
                         continue;
                     }
 
-                    const newContent = jsonData.choices[0].delta.content;
-                    emitter.emit('data', newContent);
-                }
-            };
-
-            const processFunctionBuffer = () => {
-                while (true) {
-                    const newlineIndex = buffer.indexOf("\n");
-                    if (newlineIndex === -1) {
-                        break;
+                    if (content) {
+                        emitter.emit('data', ['chat', content]);
+                    } else if (argument) {
+                        emitter.emit('data', [funcName, argument]);
                     }
-
-                    const line = buffer.slice(0, newlineIndex);
-                    buffer = buffer.slice(newlineIndex + 1);
-
-                    if (!line.startsWith("data:")) {
-                        continue;
-                    }
-
-                    const jsonData = JSON.parse(line.slice(5));
-
-                    if (jsonData.choices[0].finish_reason === 'function_call') {
-                        writable.end();
-                        break;
-                    }
-
-                    if (!jsonData.choices[0].delta.function_call.arguments) {
-                        continue;
-                    }
-
-
-                    const newContent = jsonData.choices[0].delta.function_call.arguments;
-                    emitter.emit('data', newContent);
                 }
             };
 

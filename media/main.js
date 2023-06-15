@@ -190,7 +190,6 @@ function handleMessage(event) {
 
 
 function displayMessage(text, sender, isNewMessage) {
-    let id = 0;
     if (sender === 'user' || isNewMessage || !currentWrapper) {
         currentWrapper = document.createElement('div');
         currentWrapper.className = `message-wrapper`;
@@ -230,7 +229,7 @@ function displayMessage(text, sender, isNewMessage) {
     }
 
     currentText += text;
-    messages[id].innerHTML = sender === 'assistant' ? marked.parse(currentText, { renderer }) : currentText;
+    messages[id].innerHTML = sender !== 'user' ? marked.parse(currentText, { renderer }) : currentText;
 
     messageList.appendChild(currentWrapper);
     currentWrapper.appendChild(messages[id]);

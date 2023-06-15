@@ -17,7 +17,7 @@ export function generatePayload(messages: IMessage[], apiKey: string, functions:
     });
 
     let body: any = {
-        model: config.get('useGPT4') ? "gpt-4-0613" : "gpt-3.5-turbo-0613",
+        model: config.get('model') || "gpt-3.5-turbo-0613",
         temperature: config.get('temperature') || 0,
         top_p: config.get('top_p') || 1,
         frequency_penalty: config.get('frequency_penalty') || 0,

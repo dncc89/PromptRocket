@@ -5,7 +5,7 @@ export interface ICommand {
 }
 
 export interface IMessage {
-    role?: 'system' | 'user' | 'assistant';
+    role?: string;
     name?: string;
     hiddenContext?: string;
     content?: string;

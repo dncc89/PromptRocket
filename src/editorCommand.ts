@@ -46,7 +46,7 @@ export class EditorCommand {
         ];
 
         const p = payload.generatePayload(this._messages, this._apiKey, cmd);
-        const stream = await message.streamCompletion(p, true);
+        const stream = await message.streamCompletion(p);
         let text = '';
 
         stream.on('data', (data) => {

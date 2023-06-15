@@ -11,6 +11,74 @@ export function getLanguageID() {
     return 'PlainText';
 }
 
+export async function getSymbols() {
+    const activeEditor = vscode.window.activeTextEditor;
+    const activeDocument = activeEditor?.document;
+    // List all symbols in this document
+    let symbolList = '';
+    if (activeDocument) {
+        const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
+            'vscode.executeDocumentSymbolProvider',
+            activeDocument.uri
+        );
+
+        if (symbols) {
+            symbols.forEach(symbol => {
+                symbolList += (`Symbol: ${symbol.name}, kind: ${symbol.kind}}\n`);
+            });
+        } else {
+            symbolList = 'No symbols found.';
+        }
+    } else {
+        symbolList = ('No active document found.');
+    }
+}
+
+export function getCodeBlock(symbol: string) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        return 'No active editor found.';
+    }
+
+    // Get the code block of the symbol
+    const startPosition = editor.document.positionAt(0);
+    const endPosition = editor.document.positionAt(editor.document.getText().length);
+    const codeRange = new vscode.Range(startPosition, endPosition);
+    const entireCode = editor.document.getText(codeRange);
+
+    const symbolPattern = new RegExp(`(function ${symbol}|(class|interface|enum|type) ${symbol})\\b`);
+
+    const match = entireCode.match(symbolPattern);
+    if (match) {
+        const indexOfMatch = match.index || 0;
+        const blockStart = indexOfMatch + match[0].length;
+
+        const openCurlyBracesStack: number[] = [];
+        let blockEnd = -1;
+
+        for (let i = blockStart; i < entireCode.length; i++) {
+            if (entireCode[i] === '{') {
+                openCurlyBracesStack.push(i);
+            } else if (entireCode[i] === '}') {
+                const openBraceIndex = openCurlyBracesStack.pop();
+                if (openCurlyBracesStack.length === 0) {
+                    blockEnd = i;
+                    break;
+                }
+            }
+        }
+
+        if (blockEnd !== -1) {
+            const blockRange = new vscode.Range(
+                editor.document.positionAt(blockStart),
+                editor.document.positionAt(blockEnd)
+            );
+            return editor.document.getText(blockRange);
+        }
+    }
+    return 'No match found';
+}
+
 export function getContext() {
     const editor = vscode.window.activeTextEditor;
     if (editor) {

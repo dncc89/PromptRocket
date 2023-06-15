@@ -71,13 +71,12 @@ export class ChatView implements vscode.WebviewViewProvider {
     }
 
     // Send user message from the extension, so it will be displayed in the chat
-    async sendUserMessage(text: string, isUserMessage: boolean = true, startCompletion: boolean = true, inputFromWebview: boolean = false) {
+    async sendUserMessage(text: string, startCompletion: boolean = true, inputFromWebview: boolean = false) {
         // Show panel
         await vscode.commands.executeCommand('workbench.view.extension.promptrocket-container');
 
         // Post user message then wait for webview to be ready
         await this._waitForWebviewReady();
-        this._postMessage(text, isUserMessage);
 
         // Branch for input command and regular message
         if (text.startsWith('/')) {
@@ -89,6 +88,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             await this._inputCommand?.processInput(text, inputFromWebview);
         }
         else {
+            this._postMessage(text, 'user');
             if (startCompletion) {
                 await this._returnMessage(text, inputFromWebview);
             }
@@ -125,7 +125,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             switch (message.command) {
                 case 'userMessage':
                     this._updateMessageArray(message.id);
-                    this.sendUserMessage(message.text, true, true, true);
+                    this.sendUserMessage(message.text, true, true);
                     break;
                 case 'copyToClipboard':
                     vscode.env.clipboard.writeText(message.text);
@@ -145,7 +145,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                     break;
                 case 'changeModel':
                     this._config.update('model', message.text, true);
-                    this._postMessage(`Model changed to ${message.text}`, false);
+                    this._postMessage(`Model changed to ${message.text}`, 'system');
                     break;
             }
         });
@@ -166,23 +166,17 @@ export class ChatView implements vscode.WebviewViewProvider {
         this._setUsername();
         for (let i = this._initialMessageLength; i < this._messages.length; i++) {
             if (this._messages[i].role !== 'system') {
-                this._view?.webview.postMessage({
-                    command: 'populateMessage',
-                    text: this._messages[i].content,
-                    isUserMessage: this._messages[i].role === 'user',
-                    isNewMessage: false
-                });
+                this._postMessage(this._messages[i].content || '', this._messages[i].role);
             }
         }
     }
 
-    private async _postMessage(text: string, isUserMessage: boolean = true) {
+    private async _postMessage(text: string, sender: string = 'user') {
         await this._view?.webview.postMessage({
-            command: 'populateMessage',
+            command: 'showMessage',
             text: text,
-            isUserMessage: isUserMessage,
+            sender: sender,
             isNewMessage: false,
-            isSystemMessage: false
         });
     }
 
@@ -233,11 +227,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             // In this case context is handled in preprocessMessages 
             if (text === '') {
                 const length = this._messages.length - 1;
-                this._view?.webview.postMessage({
-                    command: "chatMessage",
-                    text: this._messages[length].content,
-                    isUserMessage: true
-                });
+                this._postMessage(this._messages[length].content || '', 'user');
             }
             else {
                 // grab text selection and compare what's stored in the variable
@@ -260,8 +250,8 @@ export class ChatView implements vscode.WebviewViewProvider {
             const p = payload.generatePayload(this._messages, this._apiKey);
             const stream = await message.streamCompletion(p);
 
+            // Initialize a new message with empty content
             let currentMessage = '';
-            // Add response to the message history
             this._messages.push({
                 role: 'assistant',
                 content: currentMessage
@@ -275,8 +265,9 @@ export class ChatView implements vscode.WebviewViewProvider {
                     return;
                 }
                 this._view?.webview.postMessage({
-                    command: "chatMessage",
+                    command: 'chatStreaming',
                     text: chunk,
+                    sender: 'assistant',
                     isNewMessage: i === 0
                 });
                 i++;
@@ -286,21 +277,15 @@ export class ChatView implements vscode.WebviewViewProvider {
             });
 
             stream.on('end', () => {
-                if (this._cancelToken) {
-                    stream.removeAllListeners();
-                }
-                else {
-                    this._view?.webview.postMessage({
-                        command: "chatMessage",
-                        isCompletionEnd: true
-                    });
-                }
-
+                this._view?.webview.postMessage({
+                    command: 'chatStreaming',
+                    isCompletionEnd: true
+                });
                 // Message is sent from webview, return the focus
                 if (inputFromWebview) {
                     this._focusInputBox();
                 }
-
+                // Reset the current message for the next message
                 currentMessage = '';
             });
 

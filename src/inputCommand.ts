@@ -29,10 +29,10 @@ export class InputCommand {
             const oldValue = config.get("temperature", 1);
             if (isNaN(temp) || temp < 0 || temp > 2) {
                 config.update("temperature", temp, true);
-                await this._postSystemMessage(`Temperature must be a number between 0 and 2.`, false);
+                await this._postMessage(`Temperature must be a number between 0 and 2.`, 'system');
             }
             else {
-                await this._postSystemMessage(`Changed temperature ${oldValue} -> ${temp}.`, false);
+                await this._postMessage(`Changed temperature ${oldValue} -> ${temp}.`, 'system');
             }
         }
         else if (cmd === '/topp') {
@@ -40,10 +40,10 @@ export class InputCommand {
             const oldValue = config.get("top_p", 1);
             if (isNaN(topp) || topp < 0 || topp > 1) {
                 config.update("top_p", topp, true);
-                await this._postSystemMessage(`Top P must be a number between 0 and 1.`, false);
+                await this._postMessage(`Top P must be a number between 0 and 1.`, 'system');
             }
             else {
-                await this._postSystemMessage(`Changed Top P ${oldValue} -> ${topp}.`, false);
+                await this._postMessage(`Changed Top P ${oldValue} -> ${topp}.`, 'system');
             }
         }
         else if (cmd === '/presence') {
@@ -51,10 +51,10 @@ export class InputCommand {
             const oldValue = config.get("presence_penalty", 0);
             if (isNaN(presence) || presence < -2 || presence > 2) {
                 config.update("presence_penalty", presence, true);
-                await this._postSystemMessage(`Presence penalty must be a number between -2 and 2.`, false);
+                await this._postMessage(`Presence penalty must be a number between -2 and 2.`, 'system');
             }
             else {
-                await this._postSystemMessage(`Changed presence penalty ${oldValue} -> ${presence}.`, false);
+                await this._postMessage(`Changed presence penalty ${oldValue} -> ${presence}.`, 'system');
             }
         }
         else if (cmd === '/freq') {
@@ -62,19 +62,19 @@ export class InputCommand {
             const oldValue = config.get("frequency_penalty", 0);
             if (isNaN(freq) || freq < 2 || freq > -2) {
                 config.update("frequency_penalty", freq, true);
-                await this._postSystemMessage(`Frequency penalty must be a number between -2 and 2.`, false);
+                await this._postMessage(`Frequency penalty must be a number between -2 and 2.`, 'system');
             }
             else {
-                await this._postSystemMessage(`Changed frequency penalty ${oldValue} -> ${freq}.`, false);
+                await this._postMessage(`Changed frequency penalty ${oldValue} -> ${freq}.`, 'system');
             }
         }
         else if (cmd === '/buffer') {
             const codeblock = this._globalState.get("codeblock");
             if (codeblock) {
-                await this._postSystemMessage(`\`\`\`buffer ${codeblock}\`\`\``, false);
+                await this._postMessage(`\`\`\`buffer ${codeblock}\`\`\``, 'system');
             }
             else {
-                await this._postSystemMessage("Buffer is empty.", false);
+                await this._postMessage("Buffer is empty.", 'system');
             }
         }
         else if (cmd === '/insert') {
@@ -83,7 +83,7 @@ export class InputCommand {
                 vscode.commands.executeCommand('promptrocket.insertLastCodeblock', false);
             }
             else {
-                await this._postSystemMessage("Buffer is empty.", false);
+                await this._postMessage("Buffer is empty.", 'system');
             }
         }
         else if (cmd === '/help') {
@@ -97,10 +97,10 @@ export class InputCommand {
             helpText += "/insert: Insert the last codeblock.<br>";
             helpText += "/help: Show this help message.";
 
-            await this._postSystemMessage(helpText, false);
+            await this._postMessage(helpText, 'system');
         }
         else {
-            await this._postSystemMessage("Unknown command. Type /help for a list of commands.", false);
+            await this._postMessage("Unknown command. Type /help for a list of commands.", 'system');
         }
 
         if (inputFromWebview) {
@@ -108,13 +108,12 @@ export class InputCommand {
         }
     }
 
-    private async _postSystemMessage(text: string, isUserMessage: boolean = true) {
+    private async _postMessage(text: string, sender: string) {
         await this._view?.webview.postMessage({
-            command: 'populateMessage',
+            command: 'showMessage',
             text: text,
-            isUserMessage: isUserMessage,
+            sender: sender,
             isNewMessage: false,
-            isSystemMessage: true
         });
     }
 

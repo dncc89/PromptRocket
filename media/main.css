@@ -42,7 +42,7 @@ app {
 
 select {
     margin: 10px 10px 5px 10px;
-    padding: 5px 0px 5px 0px;
+    padding: 5px;
     flex: 1;
     background: var(--vscode-dropdown-background);
     color: var(--vscode-symbolIcon-enumMemberForeground);
@@ -79,7 +79,7 @@ select:focus {
     box-sizing: border-box;
 }
 
-.user-message-wrapper {
+.message-wrapper {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
@@ -105,12 +105,27 @@ select:focus {
     margin-bottom: 5px;
 }
 
+.sender-system {
+    color: var(--vscode-symbolIcon-enumForeground);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.sender-function {
+    color: var(--vscode-symbolIcon-classForeground);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
 .system-message {
-    color: var(--vscode-symbolIcon-enumMemberForeground);
     font-style: italic;
 }
 
 .user-message {
+    line-break: auto;
+}
+
+.function-message {
     line-break: auto;
 }
 

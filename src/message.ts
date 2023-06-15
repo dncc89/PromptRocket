@@ -30,7 +30,6 @@ export const streamCompletion = (payload: any, isFunction: boolean = false) => {
 
             const processBuffer = () => {
                 while (true) {
-                    console.log(buffer);
                     const newlineIndex = buffer.indexOf("\n");
                     if (newlineIndex === -1) {
                         break;
@@ -60,7 +59,6 @@ export const streamCompletion = (payload: any, isFunction: boolean = false) => {
             };
 
             const processFunctionBuffer = () => {
-                console.log(buffer);
                 while (true) {
                     const newlineIndex = buffer.indexOf("\n");
                     if (newlineIndex === -1) {

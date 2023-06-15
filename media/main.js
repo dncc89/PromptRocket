@@ -111,7 +111,7 @@ sendButton.addEventListener('click', () => {
     }
     else {
         if (userInput.value) {
-            // displayMessage(userInput.value, isUserMessage = true);
+            // displayMessage(userInput.value, sender==='user' = true);
             vscode.postMessage({
                 command: 'userMessage',
                 id: messages.length,
@@ -166,8 +166,8 @@ function handleMessage(event) {
         case 'focusInputBox':
             userInput.focus();
             break;
-        case 'chatMessage':
-            if (message.isNewMessage && !message.isUserMessage) {
+        case 'chatStreaming':
+            if (message.isNewMessage && message.sender === 'assistant') {
                 isStreaming = true;
             }
             if (message.isCompletionEnd) {
@@ -175,75 +175,68 @@ function handleMessage(event) {
                 currentWrapper = null;  // close the current wrapper
                 currentText = '';
             } else {
-                displayMessage(message.text, message.isUserMessage, message.isNewMessage, false);
+                displayMessage(message.text, message.sender, message.isNewMessage);
             }
             updateTextareaState();
             break;
-        case 'populateMessage':
-            displayMessage(message.text, message.isUserMessage, false, message.isSystemMessage);
+        case 'showMessage':
+            displayMessage(message.text, message.sender, true);
             currentWrapper = null;
             currentText = '';
-            break;
-        case 'setModel':
-            // setModelName(message.text);
             break;
     }
     bindCodeButtonEvents();
 }
 
 
-function displayMessage(text, isUserMessage, isNewMessage = false, isSystemMessage = false) {
-    if (isUserMessage || isNewMessage || !currentWrapper) {
+function displayMessage(text, sender, isNewMessage) {
+    let id = 0;
+    if (sender === 'user' || isNewMessage || !currentWrapper) {
         currentWrapper = document.createElement('div');
-        currentWrapper.className = isUserMessage ? 'user-message-wrapper' : 'assistant-message-wrapper';
-        currentWrapper.textContent = ' ';
+        currentWrapper.className = `message-wrapper`;
 
-        // Sender
-        let sender = document.createElement('div');
-        sender.className = isUserMessage ? 'sender-user' : 'sender-assistant';
-        let usernameText = document.createElement('span');
-        usernameText.textContent = isUserMessage ? username : assistantname;
-        let userIcon = document.createElement('span');
-        userIcon.classList.add('fa-regular', 'fa-user', 'margin-right-5');
-        let assistantIcon = document.createElement('span');
-        assistantIcon.classList.add('fa-solid', 'fa-user-astronaut', 'margin-right-5');
-        let systemIcon = document.createElement('span');
-        systemIcon.classList.add('fa-solid', 'fa-wand-magic-sparkles', 'margin-right-5');
+        // Sender display
+        let senderContainer = document.createElement('div');
+        senderContainer.className = `sender-${sender}`;
+        let senderName = document.createElement('span');
+        let senderIcon = document.createElement('span');
+        switch (sender) {
+            case 'user':
+                senderName.textContent = username;
+                senderIcon.classList.add('fa-regular', 'fa-user', 'margin-right-5');
+                break;
+            case 'assistant':
+                senderName.textContent = assistantname;
+                senderIcon.classList.add('fa-solid', 'fa-user-astronaut', 'margin-right-5');
+                break;
+            case 'system':
+                senderName.textContent = 'System';
+                senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
+                break;
+            case 'function':
+                senderName.textContent = 'Function';
+                senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
+                break;
+        }
 
-        if (isSystemMessage) {
-            sender.appendChild(systemIcon);
-        }
-        else {
-            sender.appendChild(isUserMessage ? userIcon : assistantIcon);
-        }
-        sender.appendChild(usernameText);
-        currentWrapper.appendChild(sender);
-        messageList.appendChild(currentWrapper);
         //append new one to message
         id = messages.push(document.createElement('div')) - 1;
         wrappers.push(currentWrapper);
-        messages[id].className = isUserMessage ? 'user-message' : 'assistant-message';
+        messages[id].className = `${sender}-message`;
 
-        if (isSystemMessage) {
-            usernameText.textContent += ' (system)';
-            sender.classList.add('system-message', 'system-message-fade');
-            messages[id].classList.add('system-message', 'system-message-fade');
-        }
+        senderContainer.appendChild(senderIcon);
+        senderContainer.appendChild(senderName);
+        currentWrapper.appendChild(senderContainer);
     }
 
     currentText += text;
-    if (isUserMessage) {
-        messages[id].textContent = currentText;
-    }
-    else {
-        messages[id].innerHTML = marked.parse(currentText, { renderer });
-    }
+    messages[id].innerHTML = sender === 'assistant' ? marked.parse(currentText, { renderer }) : currentText;
 
+    messageList.appendChild(currentWrapper);
     currentWrapper.appendChild(messages[id]);
 
-
     // clickable message
-    if (isUserMessage) {
+    if (sender === 'user') {
         let messageId = id;
         let wrapper = currentWrapper;
         let enterPressed = false;
@@ -294,7 +287,7 @@ function displayMessage(text, isUserMessage, isNewMessage = false, isSystemMessa
     }
 
     // Close the wrapper if it's a user message
-    if (isUserMessage) {
+    if (sender === 'user') {
         currentWrapper = null;
         currentText = '';
     }
@@ -414,8 +407,3 @@ function debounce(func, wait) {
         timeout = setTimeout(() => func.apply(context, args), wait);
     };
 }
-
-function setModelName(modelName) {
-    modelDropdown.textContent = modelName;
-}
-

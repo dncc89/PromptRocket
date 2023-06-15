@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
             prompt: "What's on your mind?",
         }) || "";
         if (message.length > 0) {
-            chatview.sendUserMessage(message, true, true, false);
+            chatview.sendUserMessage(message, true, false);
         }
     });
 

@@ -258,8 +258,16 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "number",
                                 "description": `Lines of context around where the user's cursor is. Increase range to see more context. range is 1-${maxLines}}`,
                             },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
                         },
-                        "required": ["lines", "direction"],
+                        "required": ["lines", "goal", "steps"],
                     },
                 },
                 {
@@ -272,8 +280,16 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Return empty string to get results",
                             },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
                         },
-                        "required": ["request"],
+                        "required": ["request", "goal", "steps"],
                     },
                 },
                 {
@@ -286,8 +302,16 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "File name to retrieve symbols, return empty string to access current file",
                             },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
                         },
-                        "required": ["filename"],
+                        "required": ["filename", "goal", "steps"],
                     },
                 },
                 {
@@ -300,13 +324,21 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Return empty string to get results",
                             },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
                         },
-                        "required": ["request"],
+                        "required": ["request", "goal", "steps"],
                     },
                 },
                 {
                     "name": "send_text",
-                    "description": "Send the text into editor and retrieve what text was sent.",
+                    "description": "Send the text to where cursor is at, and retrieve what text was sent. This will not run a VSCode command.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -314,8 +346,38 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Code or text to send"
                             },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
                         },
-                        "required": ["text"],
+                        "required": ["text", "goal", "steps"],
+                    },
+                },
+                {
+                    "name": "run_command",
+                    "description": "Run VSCode command and retrive what action was performed.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "type": "string",
+                                "description": "VSCode command, e.g. 'editor.action.formatDocument'"
+                            },
+                            "goal": {
+                                "type": "string",
+                                "description": "Initial goal that user has set",
+                            },
+                            "steps": {
+                                "type": "string",
+                                "description": "Steps to perform the given goal.",
+                            }
+                        },
+                        "required": ["command", "goal", "steps"],
                     },
                 }
             ];
@@ -403,6 +465,9 @@ export class ChatView implements vscode.WebviewViewProvider {
             case 'send_text':
                 result = await this._insertText(request.text);
                 break;
+            case 'run_command':
+                result = await this._runCommand(request.command);
+                break;
         }
 
         if (result === '') {
@@ -444,6 +509,12 @@ export class ChatView implements vscode.WebviewViewProvider {
         utils.replaceSelectedText(text);
         const result = JSON.stringify(text, null, 2);
         return `{ "text_sent": ${result} }}`;
+    }
+
+    private async _runCommand(text: string) {
+        await vscode.commands.executeCommand(text);
+        const result = JSON.stringify(text, null, 2);
+        return `{ "command_sent": ${result} }}`;
     }
 
     // Save message array to globalState

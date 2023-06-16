@@ -1,22 +1,27 @@
-# PromptRocket
+# PromptRocket (Experimental)
 
 ![Intro](https://i.imgur.com/maLt7mn.gif, "Intro")
 
-PromptRocket is a AI-powered extension for VSCode that effortlessly brings contextual understanding to your side panel. By intelligently analyzing your text selection, it grasps the context and provides relevant suggestions, enhancing your coding experience. Seamlessly integrate PromptRocket to your workflow, and watch your productivity soar through the power of AI-driven insights.
+PromptRocket is an experimental VSCode co-pilot extension, based on autonomous behavior. Besides of its basic functions like having a chat panel on your editor, it drives VSCode by itself to achieve given goals. 
 Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.
 
-## What's the difference?
+## What's the difference in this flood of AI tools?
 Here are some core principles of PromptRocket:
 
-1. **Ensure full customization of the model and prompts.**
+1. **Autonomous agent(*experimental)**
+
+ PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself!
+
+
+2. **Ensure full customization of the model and prompts.**
 
  It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
 
-2. **It should remember chat history while keeping track of text selections.**
+3. **It should remember chat history while keeping track of text selections.**
 
 PromptRocket tracks chat history and recognizes your text selections, as well as the context surrounding them. The main purpose of this extension is to boost brainstorming by integrating ChatGPT's conversational format into VSCode.
 
-3. **Maintain a simple and tidy UI that doesn't disrupt visuals.**
+4. **Maintain a simple and tidy UI that doesn't disrupt visuals.**
 
 I promise there won't be any flashy elements in the panel.
 
@@ -25,7 +30,7 @@ I promise there won't be any flashy elements in the panel.
 PromptRocket provides two ways of use, chat mode and command mode.
 
 ## Customizable Chat Mode 
-Realizing the importance of convenience and customization, our chat mode lets you start a blank chat or use a custom template. Some templates might need extra context for better functionality. PromptRocket's smart text recognition guarantees accurate responses and full context understanding. Its ability to smoothly follow your focus across multiple files or code sections gives you a deeper insight.
+Our chat mode lets you start a blank chat or use a custom template. Some templates might need extra context for better functionality. PromptRocket's smart text recognition gives accurate responses and full context understanding. Its ability to smoothly follow your focus across multiple files or code sections gives you a deeper insight.
 
 - **New Chat** - Launches a new, empty chat free of templates.
 - **Open Chat Template** - Begins a chat utilizing a personalized template.

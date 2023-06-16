@@ -112,7 +112,7 @@ select:focus {
 }
 
 .sender-function {
-    color: var(--vscode-symbolIcon-classForeground);
+    color: var(--vscode-symbolIcon-enumForeground);
     font-weight: bold;
     margin-bottom: 5px;
 }
@@ -126,7 +126,28 @@ select:focus {
 }
 
 .function-message {
+    max-height: 20px;
+    overflow: hidden;
     line-break: auto;
+    padding-right: 17px;
+    transition: max-height 0.5s ease-in-out;
+}
+
+.function-message:hover {
+    opacity: 1;
+    max-height: 300px;
+    line-break: auto;
+    /* Add a right padding to compensate for the scrollbar width */
+}
+
+.function-message:hover {
+    height: auto;
+    overflow: scroll;
+    /* Always show the scrollbar */
+}
+
+.user-message:hover {
+    height: auto;
 }
 
 .user-message:hover {

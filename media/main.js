@@ -214,7 +214,7 @@ function displayMessage(text, sender, isNewMessage) {
                 break;
             case 'function':
                 senderName.textContent = 'Function';
-                senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
+                senderIcon.classList.add('fa-solid', 'fa-satellite-dish', 'margin-right-5');
                 break;
         }
 
@@ -229,8 +229,26 @@ function displayMessage(text, sender, isNewMessage) {
     }
 
     currentText += text;
-    messages[id].innerHTML = sender !== 'user' ? marked.parse(currentText, { renderer }) : currentText;
+    let newText = '';
 
+    switch (sender) {
+        case 'assistant':
+            newText = marked.parse(currentText, { renderer });
+            break;
+        case 'function':
+            newText = `<p>Hover to see the details</p><br><pre><code>${currentText}</code></pre>`;
+            messages[id].classList.add('system-message-fade');
+            break;
+        case 'user':
+            newText = currentText;
+            break;
+        case 'system':
+            newText = currentText;
+            messages[id].classList.add('system-message-fade');
+            break;
+    }
+
+    messages[id].innerHTML = newText;
     messageList.appendChild(currentWrapper);
     currentWrapper.appendChild(messages[id]);
 

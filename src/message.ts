@@ -86,9 +86,9 @@ export const streamCompletion = (payload: any) => {
     return emitter;
 };
 
-export function preprocessMessages(messages: IMessage[]) {
-    const language = utils.getLanguageID();
-    const context = utils.getContext() || ['', '', ''];
+export async function preprocessMessages(messages: IMessage[]) {
+    const language = await utils.getLanguageID();
+    const context = await utils.getContext() || ['', '', ''];
     let newMessages: IMessage[] = [];
 
     messages.forEach((msg) => {
@@ -96,15 +96,14 @@ export function preprocessMessages(messages: IMessage[]) {
         let hiddenContext = msg.hiddenContext || "";
         let content = msg.content || "";
 
-        hiddenContext = hiddenContext.replace(/{{language}}/g, language);
-        hiddenContext = hiddenContext.replace(/{{context_before}}/g, context[0]);
-        hiddenContext = hiddenContext.replace(/{{selected_text}}/g, context[1]);
-        hiddenContext = hiddenContext.replace(/{{context_after}}/g, context[2]);
-
         content = content.replace(/{{language}}/g, language);
         content = content.replace(/{{context_before}}/g, context[0]);
         content = content.replace(/{{selected_text}}/g, context[1]);
         content = content.replace(/{{context_after}}/g, context[2]);
+
+        if (hiddenContext.length > 0) {
+            hiddenContext = `Context: \`\`\`${hiddenContext}\`\`\`\n`;
+        }
 
         const newMessage: IMessage = {
             role: role,

@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
 const yaml = require('js-yaml');
+const path = require('path');
+const fs = require('fs');
+const gitignoreParser = require('gitignore-parser');
 
-export function getLanguageID() {
+export async function getLanguageID() {
     const activeEditor = vscode.window.activeTextEditor;
     // Get the language of the current open file
     if (activeEditor) {
@@ -11,11 +14,21 @@ export function getLanguageID() {
     return 'PlainText';
 }
 
-export async function getSymbols() {
+export async function getSymbols(filename: string = '') {
     const activeEditor = vscode.window.activeTextEditor;
-    const activeDocument = activeEditor?.document;
+
+    // if filename is not specified, use the active document
+    let activeDocument = activeEditor?.document;
+    if (filename.length > 0) {
+        const documents = vscode.workspace.textDocuments;
+        const document = documents.find(document => document.fileName.endsWith(filename));
+        if (document) {
+            activeDocument = document;
+        }
+    }
+
     // List all symbols in this document
-    let symbolList = '';
+    let symbolList: any = [];
     if (activeDocument) {
         const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
             'vscode.executeDocumentSymbolProvider',
@@ -24,68 +37,47 @@ export async function getSymbols() {
 
         if (symbols) {
             symbols.forEach(symbol => {
-                symbolList += (`Symbol: ${symbol.name}, kind: ${symbol.kind}}\n`);
+                // convert kind to readable string
+                let kind = vscode.SymbolKind[symbol.kind];
+                kind = kind.charAt(0).toUpperCase() + kind.slice(1);
+
+                // get symbol arguments
+                let args = '';
+                if (symbol.kind === vscode.SymbolKind.Function) {
+                    const functionPattern = new RegExp(`${symbol.name}\\((.*)\\)`);
+                    const match = activeDocument?.getText().match(functionPattern);
+                    if (match) {
+                        args = match[1];
+                    }
+                }
+
+                // add symbol to the list
+                symbolList.push({
+                    kind: kind,
+                    name: symbol.name,
+                    args: args,
+                });
             });
         } else {
-            symbolList = 'No symbols found.';
+            symbolList = ['No symbol'];
         }
     } else {
-        symbolList = ('No active document found.');
+        symbolList = ['No active document '];
     }
+    return symbolList;
 }
 
-export function getCodeBlock(symbol: string) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        return 'No active editor found.';
-    }
-
-    // Get the code block of the symbol
-    const startPosition = editor.document.positionAt(0);
-    const endPosition = editor.document.positionAt(editor.document.getText().length);
-    const codeRange = new vscode.Range(startPosition, endPosition);
-    const entireCode = editor.document.getText(codeRange);
-
-    const symbolPattern = new RegExp(`(function ${symbol}|(class|interface|enum|type) ${symbol})\\b`);
-
-    const match = entireCode.match(symbolPattern);
-    if (match) {
-        const indexOfMatch = match.index || 0;
-        const blockStart = indexOfMatch + match[0].length;
-
-        const openCurlyBracesStack: number[] = [];
-        let blockEnd = -1;
-
-        for (let i = blockStart; i < entireCode.length; i++) {
-            if (entireCode[i] === '{') {
-                openCurlyBracesStack.push(i);
-            } else if (entireCode[i] === '}') {
-                const openBraceIndex = openCurlyBracesStack.pop();
-                if (openCurlyBracesStack.length === 0) {
-                    blockEnd = i;
-                    break;
-                }
-            }
-        }
-
-        if (blockEnd !== -1) {
-            const blockRange = new vscode.Range(
-                editor.document.positionAt(blockStart),
-                editor.document.positionAt(blockEnd)
-            );
-            return editor.document.getText(blockRange);
-        }
-    }
-    return 'No match found';
-}
-
-export function getContext() {
+export async function getContext(lines: number = 5) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
         const config = vscode.workspace.getConfiguration('promptrocket');
         const selection = editor.selection;
         const document = editor.document;
-        const contextLength = config.get<number>('contextLength') || 5;
+        const maxLines = config.get<number>('contextLength') || 20;
+        let contextLength = lines;
+        if (contextLength > maxLines) {
+            contextLength = maxLines;
+        }
 
         // Determine the start and end lines based on the selection
         const startLine = Math.max(selection.start.line - contextLength, 0);
@@ -111,7 +103,44 @@ export function getContext() {
     }
 }
 
-export function replaceSelectedText(text: string) {
+export async function getProjectFiles() {
+    const editor = vscode.window.activeTextEditor;
+    let result = [];
+    if (editor) {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders) {
+            const workspaceFolder = workspaceFolders[0];
+            // find files that not gitignored
+            const gitignorePath = path.join(workspaceFolder.uri.fsPath, '.gitignore');
+            if (fs.existsSync(gitignorePath)) {
+                const gitignoreContent = fs.readFileSync(gitignorePath).toString();
+                const gitignore = gitignoreParser.compile(gitignoreContent);
+                // list all files that not gitignored
+                let files = fs.readdirSync(workspaceFolder.uri.fsPath);
+                // get files under folders
+                const folders = files.filter((file: string) => fs.statSync(path.join(workspaceFolder.uri.fsPath, file)).isDirectory());
+                folders.forEach((folder: string) => {
+                    const folderFiles = fs.readdirSync(path.join(workspaceFolder.uri.fsPath, folder));
+                    files = files.concat(folderFiles.map((file: string) => path.join(folder, file)));
+                });
+
+                const notIgnoredFiles = files.filter((file: string) => !gitignore.denies(file));
+                result = notIgnoredFiles;
+            }
+            else {
+                // just list all files
+                const files = fs.readdirSync(workspaceFolder.uri.fsPath);
+                result = files;
+            }
+        }
+        else {
+            result = ['No file'];
+        }
+    }
+    return result;
+}
+
+export async function replaceSelectedText(text: string) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
         const selection = editor.selection;
@@ -121,35 +150,38 @@ export function replaceSelectedText(text: string) {
     }
 }
 
-export function getDiagnostics() {
+export async function getDiagnostics() {
     const activeEditor = vscode.window.activeTextEditor;
     const activeDocument = activeEditor?.document;
     const selection = activeEditor?.selection;
-    const startPosition = selection?.start;
-    const endPosition = selection?.end;
+    const startPosition = selection?.start.translate(-5, 0);
+    const endPosition = selection?.end.translate(5, 0);
 
     let errorMessages = [];
     if (startPosition && endPosition && activeDocument) {
         const diagnostics = vscode.languages.getDiagnostics(activeDocument.uri);
         for (const diagnostic of diagnostics) {
             if (
-                (diagnostic.range.start.isBeforeOrEqual(startPosition) && diagnostic.range.end.isAfterOrEqual(startPosition)) ||
-                (diagnostic.range.start.isBeforeOrEqual(endPosition) && diagnostic.range.end.isAfterOrEqual(endPosition))
+                (diagnostic.range.start.isAfterOrEqual(startPosition) &&
+                    diagnostic.range.end.isBeforeOrEqual(endPosition))
             ) {
-                errorMessages.push(diagnostic.message);
-                vscode.window.showErrorMessage(`promptrocket: ${diagnostic.message}`);
+
+                // retrieve code for this range
+                const code = activeDocument.getText(diagnostic.range);
+                errorMessages.push({
+                    code: code,
+                    message: diagnostic.message,
+                });
+
+                if (errorMessages.length > 5) {
+                    break;
+                }
             }
         }
     }
-    if (errorMessages.length > 0) {
-        const errorDetails = errorMessages.map((message, index) => ({
-            [`Diagnostics`]: {
-                message: `(error) ${message}`,
-            },
-        }));
-        return yaml.dump(errorDetails);
+    if (errorMessages.length === 0) {
+        errorMessages = ['No error'];
     }
-    else {
-        return '';
-    }
+
+    return errorMessages;
 }

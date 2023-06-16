@@ -221,62 +221,135 @@ export class ChatView implements vscode.WebviewViewProvider {
 
     private async _returnMessage(text: string, requester: string, inputFromWebview: boolean) {
         try {
-            if (this._currentLoop > 3) {
-                return;
+            // Get text selectio
+            const selection = await utils.getContext();
+            let context = `Context:\`\`\`${selection}\`\`\`\n`;
+            if (selection[1] === '' || selection[1] === this._textSelection) {
+                context = '';
             }
-
-            // preprocess messages 
-            this._messages = message.preprocessMessages(this._messages);
-            this._cancelToken = false;
+            this._textSelection = selection[1];
+            if (requester !== 'user') {
+                context = '';
+            }
 
             const requestMessage: IMessage = {
                 role: requester,
+                hiddenContext: context,
                 content: text,
             };
             this._messages.push(requestMessage);
+            this._saveMessages();
 
+            if (this._currentLoop > 3 && requester === 'function') {
+                return;
+            }
+
+            this._messages = await message.preprocessMessages(this._messages);
+            this._cancelToken = false;
+            const maxLines = this._config.get<number>('contextLength') || 20;
             const cmd = [
                 {
-                    "name": "get_document_context",
-                    "description": "Get document context for current file, including what user is focusing on",
+                    "name": "get_context",
+                    "description": "Retrieve what user is currently looking at",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "lines": {
                                 "type": "number",
-                                "description": "Lines of context around what user is seeing, range 5-20",
+                                "description": `Lines of context around where the user's cursor is. Increase range to see more context. range is 1-${maxLines}}`,
                             },
                         },
-                        "required": ["lines"],
+                        "required": ["lines", "direction"],
                     },
                 },
+                {
+                    "name": "get_project_files",
+                    "description": "Get list of project files",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "request": {
+                                "type": "string",
+                                "description": "Return empty string to get results",
+                            },
+                        },
+                        "required": ["request"],
+                    },
+                },
+                {
+                    "name": "get_symbols",
+                    "description": "Access to symbols inside a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "filename": {
+                                "type": "string",
+                                "description": "File name to retrieve symbols, return empty string to access current file",
+                            },
+                        },
+                        "required": ["filename"],
+                    },
+                },
+                {
+                    "name": "get_diagnostics",
+                    "description": "Retrieve semantic errors. Assistant can detect typos and syntax errors but diagnostics cannot, so code must be reviewed by assistant first before calling this command.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "request": {
+                                "type": "string",
+                                "description": "Return empty string to get results",
+                            },
+                        },
+                        "required": ["request"],
+                    },
+                },
+                {
+                    "name": "send_text",
+                    "description": "Send the text into editor and retrieve what text was sent.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "Code or text to send"
+                            },
+                        },
+                        "required": ["text"],
+                    },
+                }
             ];
 
             const p = payload.generatePayload(this._messages, this._apiKey, cmd);
             const stream = await message.streamCompletion(p);
 
-            // Initialize a new message with empty content
-            let currentMessage = '';
-            this._messages.push({
-                role: 'assistant',
-                content: currentMessage
-            });
-            this._saveMessages();
-
             let i = 0;
+            let newMessage = '';
+
             let funcName = 'chat';
             stream.on('data', (chunk) => {
                 funcName = chunk[0];
                 this._view?.webview.postMessage({
                     command: 'chatStreaming',
                     text: chunk[1],
-                    sender: 'assistant',
+                    sender: funcName === 'chat' ? 'assistant' : 'function',
                     isNewMessage: i === 0
                 });
-                i++;
-                this._messages[this._messages.length - 1].content = currentMessage;
+
+                newMessage += chunk[1];
+                const sender = funcName === 'chat' ? 'assistant' : 'function';
+
+                if (i === 0) {
+                    this._messages.push({
+                        role: sender,
+                        content: newMessage
+                    });
+                }
+                this._messages[this._messages.length - 1].content = newMessage;
+                this._messages[this._messages.length - 1].role = sender;
                 this._saveMessages();
-                currentMessage += chunk[1];
+                i++;
+
                 if (this._cancelToken) {
                     stream.removeAllListeners();
                     return;
@@ -293,10 +366,10 @@ export class ChatView implements vscode.WebviewViewProvider {
 
                 if (funcName !== 'chat') {
                     // Parse the function call and return the result to streamcompletion
-                    this._handleFunctions(funcName, currentMessage);
+                    this._handleFunctions(funcName, JSON.parse(newMessage), inputFromWebview);
                 }
                 // Reset the current message for the next message
-                currentMessage = '';
+                newMessage = '';
                 this._currentLoop++;
             });
 
@@ -309,21 +382,66 @@ export class ChatView implements vscode.WebviewViewProvider {
         }
     }
 
-    private _handleFunctions(funcName: string, request: any) {
+    private async _handleFunctions(funcName: string, request: any, inputFromWebview: boolean) {
+        console.log(`Calling function: ${funcName}`);
+        let result = '';
         switch (funcName) {
-            case 'get_document_context':
-                const lines = utils.getContext();
-                const context = JSON.stringify({
-                    "file_language": utils.getLanguageID(),
-                    "context_before": lines[0],
-                    "context_after": lines[2],
-                    "text_selection": lines[1],
-                });
-
-                this._postMessage(`\`\`\`${funcName} ${context}\`\`\``, 'function');
-                this._returnMessage(context, 'function', false);
+            case 'get_context':
+                result = await this._getContext(request.lines);
+                break;
+            case 'get_project_files':
+                result = await this._getProjectFiles();
+                break;
+            case 'get_symbols':
+                result = await this._getSymbols(request.filename);
+                break;
+            case 'get_diagnostics':
+                result = await this._getDiagnostics();
+                break;
+            case 'send_text':
+                result = await this._insertText(request.text);
                 break;
         }
+
+        if (result === '') {
+            result = "['function failed. return to conversation for further instruction.']";
+        }
+        this._postMessage(result, 'function');
+        this._returnMessage(result, 'function', inputFromWebview);
+    }
+
+    private async _getContext(lines: number) {
+        const context = await utils.getContext(lines);
+        const result = JSON.stringify({
+            "file_language": await utils.getLanguageID(),
+            "context_before": context[0],
+            "context_after": context[2],
+            "text_selection": context[1],
+        }, null, 2);
+        return `{ "context": ${result} } `;
+    }
+
+    private async _getSymbols(filename = '') {
+        const symbols = JSON.stringify(await utils.getSymbols(filename), null, 2);
+        return `{ "symbols": ${symbols} } `;
+    }
+
+    private async _getProjectFiles() {
+        const files = JSON.stringify(await utils.getProjectFiles(), null, 2);
+        return `{ "files": ${files} } `;
+    }
+
+
+    private async _getDiagnostics() {
+        const diagnostics = JSON.stringify(await utils.getDiagnostics(), null, 2);
+        return `{ "diagnostics": ${diagnostics} }`;
+    }
+
+
+    private async _insertText(text: string) {
+        utils.replaceSelectedText(text);
+        const result = JSON.stringify(text, null, 2);
+        return `{ "text_sent": ${result} }}`;
     }
 
     // Save message array to globalState

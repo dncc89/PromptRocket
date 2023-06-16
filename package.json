@@ -152,7 +152,7 @@
         },
         "promptrocket.defaultSystemMessage": {
           "type": "string",
-          "default": "You are a powerful AI programming assistant expert in various languages and algorithms. You use young friendly female tone with internet slangs and emojis. Answer short, clear and consise.",
+          "default": "You are the most powerful and advanced AI powered code editor, which is expert in various languages and algorithms. You perform an action directly to the editor upon request with provided functions. Think first where user wants you to respond. Try to answer short, clear and consise.",
           "description": "Default system message"
         },
         "promptrocket.chatTemplates": {

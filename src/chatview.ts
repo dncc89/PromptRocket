@@ -37,6 +37,7 @@ export class ChatView implements vscode.WebviewViewProvider {
         this._messages = messages;
         this._cancelToken = true;
         this._saveMessages();
+        console.log(this._messages);
 
         if (this._messages.length === 0) {
             // Add default system message if there are no messages
@@ -196,8 +197,8 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _setUsername() {
         // Set usernames 
         const config = vscode.workspace.getConfiguration("promptrocket");
-        const username = config.get("userName", []);
-        const assistantname = config.get("assistantName", []);
+        const username = config.get("userName", "User");
+        const assistantname = config.get("assistantName", "PromptRocket");
         this._view?.webview.postMessage({
             command: "setUserName",
             name: username,
@@ -382,8 +383,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                 }
             ];
 
-            const p = payload.generatePayload(this._messages, this._apiKey, cmd);
-            const stream = await message.streamCompletion(p);
+            const p = await payload.generatePayload(this._messages, this._apiKey, cmd);
+            const stream = message.streamCompletion(p);
 
             let i = 0;
             let newMessage = '';
@@ -404,7 +405,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                 if (i === 0) {
                     this._messages.push({
                         role: sender,
-                        content: newMessage
+                        content: newMessage,
+                        name: funcName
                     });
                 }
                 this._messages[this._messages.length - 1].content = newMessage;
@@ -519,12 +521,12 @@ export class ChatView implements vscode.WebviewViewProvider {
 
     // Save message array to globalState
     private _saveMessages() {
-        this._globalState.update('messages', this._messages);
+        // this._globalState.update('messages', this._messages);
     }
 
     // Load message array from globalState
     private _loadMessages() {
-        this._messages = this._globalState.get('messages', []) as IMessage[];
+        // this._messages = this._globalState.get('messages', []) as IMessage[];
     }
 
     private _focusInputBox() {

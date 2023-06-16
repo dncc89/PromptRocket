@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
 export function getHtmlForWebview(context: vscode.ExtensionContext, webview: vscode.Webview): string {
-    const userName = vscode.workspace.getConfiguration("promptrocket").get("userName", []);
-    const assistantName = vscode.workspace.getConfiguration("promptrocket").get("assistantName", []);
+    const userName = vscode.workspace.getConfiguration("promptrocket").get("userName", "User");
+    const assistantName = vscode.workspace.getConfiguration("promptrocket").get("assistantName", "PromptRocket");
     const modelName = (vscode.workspace.getConfiguration("promptrocket").get("model", []) || "").toString();
     const welcomeMessage = `Welcome back ${userName}! How can I assist you today? 👩‍💻👨‍💻🚀`;
     const configuration = vscode.workspace.getConfiguration('editor');

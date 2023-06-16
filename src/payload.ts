@@ -3,8 +3,10 @@ import * as vscode from 'vscode';
 
 import { ICommand, IMessage } from './interfaces';
 
-export function generatePayload(messages: IMessage[], apiKey: string, functions: any = []) {
+export async function generatePayload(messages: IMessage[], apiKey: string, functions: any = []) {
     const config = vscode.workspace.getConfiguration('promptrocket');
+    const username = config.get("userName", "User");
+    const assistantName = config.get("assistantName", "PromptRocket");
     let newMessages: IMessage[] = [];
 
     // Go through messages and combine content and hiddenContext
@@ -12,7 +14,6 @@ export function generatePayload(messages: IMessage[], apiKey: string, functions:
         newMessages.push({
             role: msg.role,
             content: msg.hiddenContext ? msg.hiddenContext + msg.content : msg.content,
-            name: msg.role === 'user' ? config.get('userName') : config.get('assistantName'),
         });
     });
 

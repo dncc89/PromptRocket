@@ -4,7 +4,7 @@ const outputContainer = document.getElementById('output-container');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const modelDropdown = document.getElementById('model-select');
-const thinkingTexts = ['Thinking.', 'Thinking..', 'Thinking...', 'Thinking....', 'Thinking.....'];
+const thinkingTexts = ['.', '..', '...', '....', '.....'];
 let inputPlaceholder = '';
 let counter = 0;
 let username = 'User';
@@ -210,11 +210,13 @@ function displayMessage(text, sender, isNewMessage) {
                 break;
             case 'system':
                 senderName.textContent = 'System';
-                senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
+                senderIcon.classList.add('fa-solid', 'fa-desktop', 'margin-right-5');
                 break;
             case 'function':
-                senderName.textContent = 'Function';
-                senderIcon.classList.add('fa-solid', 'fa-satellite-dish', 'margin-right-5');
+                senderName.textContent = 'Thinking...';
+                senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
+                currentWrapper.classList.add('max-height-20');
+                senderContainer.classList.add('system-message-fade');
                 break;
         }
 
@@ -236,8 +238,7 @@ function displayMessage(text, sender, isNewMessage) {
             newText = marked.parse(currentText, { renderer });
             break;
         case 'function':
-            newText = `<p>Hover to see the details</p><br><pre><code>${currentText}</code></pre>`;
-            messages[id].classList.add('system-message-fade');
+            newText = `<pre><code>${currentText}</code></pre>`;
             break;
         case 'user':
             newText = currentText;

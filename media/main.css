@@ -107,13 +107,11 @@ select:focus {
 
 .sender-system {
     color: var(--vscode-symbolIcon-enumForeground);
-    font-weight: bold;
     margin-bottom: 5px;
 }
 
 .sender-function {
     color: var(--vscode-symbolIcon-enumForeground);
-    font-weight: bold;
     margin-bottom: 5px;
 }
 
@@ -126,28 +124,7 @@ select:focus {
 }
 
 .function-message {
-    max-height: 20px;
     overflow: hidden;
-    line-break: auto;
-    padding-right: 17px;
-    transition: max-height 0.5s ease-in-out;
-}
-
-.function-message:hover {
-    opacity: 1;
-    max-height: 300px;
-    line-break: auto;
-    /* Add a right padding to compensate for the scrollbar width */
-}
-
-.function-message:hover {
-    height: auto;
-    overflow: scroll;
-    /* Always show the scrollbar */
-}
-
-.user-message:hover {
-    height: auto;
 }
 
 .user-message:hover {
@@ -158,6 +135,14 @@ select:focus {
     line-break: auto;
 }
 
+.max-height-20 {
+    max-height: 20px;
+    transition: max-height 0.2s ease-in-out;
+}
+
+.max-height-20:hover {
+    max-height: 1000px;
+}
 
 .margin-right-5 {
     margin-right: 5px;
@@ -324,7 +309,9 @@ p {
 }
 
 pre {
-    overflow: scroll;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     padding: 10px 10px 5px 10px;
     margin: 0px;
     border-radius: 3px;
@@ -336,6 +323,9 @@ hr {
 }
 
 code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     font-family: var(--vscode-editor-font-family);
     font-weight: var(--vscode-editor-font-weight);
     font-size: var(--vscode-editor-font-size);
@@ -368,8 +358,8 @@ blockquote {
 
 /* Apply the animation to the element */
 .system-message-fade {
-    animation-duration: 3s;
+    animation-duration: 1s;
     animation-fill-mode: forwards;
     animation-name: system-message-fade;
-    animation-timing-function: ease-in;
+    animation-timing-function: ease-in-out;
 }

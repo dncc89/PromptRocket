@@ -361,8 +361,10 @@ export class ChatView implements vscode.WebviewViewProvider {
                     command: 'chatStreaming',
                     isCompletionEnd: true
                 });
-                // Message is sent from webview, return the focus
-                this._focusInputBox();
+
+                if (inputFromWebview) {
+                    this._focusInputBox();
+                }
 
                 if (funcName !== 'chat') {
                     // Parse the function call and return the result to streamcompletion

@@ -2,16 +2,16 @@
 
 ![Intro](https://i.imgur.com/ekNiaey.gif, "Intro")
 
-PromptRocket is an experimental VSCode co-pilot extension, based on autonomous behavior. Besides of its basic functions like having a chat panel on your editor, it drives VSCode by itself to achieve given goals. 
+PromptRocket is an experimental VSCode autopilot extension, based on the OpenAI's the newest function call API. Besides of its basic functions like having a chat panel on your editor, it drives VSCode by itself to achieve given goals. 
 Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.
 
 ## What's the difference in this flood of AI tools?
 Here are some core principles of PromptRocket:
 
-1. **Autonomous agent(*experimental)**
+1. **Autonomous agent**
 
- PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself!
-
+ PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself! 
+ Warning: It might destroy your working code or the whole project, use it with caution.
 
 2. **Ensure full customization of the model and prompts.**
 

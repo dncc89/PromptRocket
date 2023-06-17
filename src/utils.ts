@@ -185,3 +185,40 @@ export async function getDiagnostics() {
 
     return errorMessages;
 }
+
+export async function findAndSelectText(text: string) {
+    console.log(text);
+    let result = 'no active editor';
+    let editor = vscode.window.activeTextEditor;
+    if (editor) {
+        let document = editor.document;
+        let fullText = document.getText();
+        let cursorPosition = editor.selection.active;
+        let cursorOffset = document.offsetAt(cursorPosition);
+
+        let closestIndex = -1;
+        let closestDistance = Infinity;
+        let index = fullText.indexOf(text);
+        while (index !== -1) {
+            let distance = Math.abs(cursorOffset - index);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = index;
+            }
+            index = fullText.indexOf(text, index + 1);
+        }
+
+        if (closestIndex !== -1) {
+            let start = document.positionAt(closestIndex);
+            let end = document.positionAt(closestIndex + text.length);
+            let range = new vscode.Range(start, end);
+
+            editor.selection = new vscode.Selection(range.start, range.end);
+            // return new selected text
+            result = vscode.window.activeTextEditor?.document.getText(vscode.window.activeTextEditor?.selection) || 'failed to select text';
+        } else {
+            result = 'couldn\'t find text';
+        }
+    }
+    return result;
+}

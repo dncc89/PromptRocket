@@ -320,6 +320,20 @@ export class ChatView implements vscode.WebviewViewProvider {
                     },
                 },
                 {
+                    "name": "find_and_select_text",
+                    "description": "Select a text in editor. This can be used for user's attention, search text, or editing text.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "Code or text to send"
+                            },
+                        },
+                        "required": ["text"],
+                    },
+                },
+                {
                     "name": "run_command",
                     "description": "Run VSCode command and retrive what action was performed.",
                     "parameters": {
@@ -422,6 +436,10 @@ export class ChatView implements vscode.WebviewViewProvider {
             case 'run_command':
                 result = await this._runCommand(request.command);
                 break;
+            case 'find_and_select_text':
+                result = await this._findAndSelectText(request.text);
+                break;
+
         }
 
         if (result === '') {
@@ -469,6 +487,11 @@ export class ChatView implements vscode.WebviewViewProvider {
         await vscode.commands.executeCommand(text);
         const result = JSON.stringify(text, null, 2);
         return `{ "command_sent": ${result} }`;
+    }
+
+    private async _findAndSelectText(text: string) {
+        const result = JSON.stringify(await utils.findAndSelectText(text), null, 2);
+        return `{ "text_selected": ${result} }`;
     }
 
     // Save message array to globalState

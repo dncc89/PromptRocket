@@ -39,10 +39,16 @@ async function preprocessMessages(messages: IMessage[]) {
     let newMessages: IMessage[] = [];
 
     messages.forEach((msg) => {
+        console.log(msg);
         let role = msg.role || "user";
         let hiddenContext = msg.hiddenContext || "";
         let content = msg.content || "";
         let name = msg.name || "";
+
+        // if name isn ot empty and role is function, skip this
+        if (name.length === 0 && role === "function") {
+            return;
+        }
 
         content = content.replace(/{{language}}/g, language);
         content = content.replace(/{{context_before}}/g, context[0]);
@@ -63,7 +69,6 @@ async function preprocessMessages(messages: IMessage[]) {
             newMessage.name = name;
         }
 
-        console.log(newMessage);
         newMessages.push(newMessage);
     });
 

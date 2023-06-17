@@ -213,7 +213,7 @@ function displayMessage(text, sender, isNewMessage) {
                 senderIcon.classList.add('fa-solid', 'fa-desktop', 'margin-right-5');
                 break;
             case 'function':
-                senderName.textContent = 'Thinking...';
+                senderName.textContent = 'Function';
                 senderIcon.classList.add('fa-solid', 'fa-bolt', 'margin-right-5');
                 currentWrapper.classList.add('max-height-20');
                 senderContainer.classList.add('system-message-fade');

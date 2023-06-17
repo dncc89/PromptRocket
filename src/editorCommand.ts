@@ -14,7 +14,6 @@ export class EditorCommand {
 
     async runCommand(messages: IMessage[], argument: string) {
         this._messages = messages;
-        this._messages = await message.preprocessMessages(this._messages);
 
         const editor = vscode.window.activeTextEditor;
         if (!editor) {

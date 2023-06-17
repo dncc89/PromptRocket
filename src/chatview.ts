@@ -259,16 +259,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "number",
                                 "description": `Lines of context around where the user's cursor is. Increase range to see more context. range is 1-${maxLines}}`,
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["lines", "goal", "steps"],
+                        "required": ["lines"],
                     },
                 },
                 {
@@ -281,16 +273,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Return empty string to get results",
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["request", "goal", "steps"],
+                        "required": ["request"],
                     },
                 },
                 {
@@ -303,16 +287,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "File name to retrieve symbols, return empty string to access current file",
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["filename", "goal", "steps"],
+                        "required": ["filename"],
                     },
                 },
                 {
@@ -325,16 +301,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Return empty string to get results",
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["request", "goal", "steps"],
+                        "required": ["request"],
                     },
                 },
                 {
@@ -347,16 +315,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "Code or text to send"
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["text", "goal", "steps"],
+                        "required": ["text"],
                     },
                 },
                 {
@@ -369,16 +329,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                                 "type": "string",
                                 "description": "VSCode command, e.g. 'editor.action.formatDocument'"
                             },
-                            "goal": {
-                                "type": "string",
-                                "description": "Initial goal that user has set",
-                            },
-                            "steps": {
-                                "type": "string",
-                                "description": "Steps to perform the given goal.",
-                            }
                         },
-                        "required": ["command", "goal", "steps"],
+                        "required": ["command"],
                     },
                 }
             ];
@@ -389,29 +341,28 @@ export class ChatView implements vscode.WebviewViewProvider {
             let i = 0;
             let newMessage = '';
             let funcName = 'chat';
+
             stream.on('data', (chunk) => {
                 funcName = chunk[0];
                 newMessage += chunk[1];
+                const sender = funcName === 'chat' ? 'assistant' : 'function';
+                this._view?.webview.postMessage({
+                    command: 'chatStreaming',
+                    text: chunk[1],
+                    sender: sender,
+                    isNewMessage: i === 0
+                });
 
-                if (funcName === 'chat') {
-                    this._view?.webview.postMessage({
-                        command: 'chatStreaming',
-                        text: chunk[1],
-                        sender: 'assistant',
-                        isNewMessage: i === 0
+                if (i === 0) {
+                    this._messages.push({
+                        role: sender,
+                        content: newMessage
                     });
-
-                    if (i === 0) {
-                        this._messages.push({
-                            role: 'assistant',
-                            content: newMessage
-                        });
-                    }
-
-                    this._messages[this._messages.length - 1].content = newMessage;
-                    this._messages[this._messages.length - 1].role = 'assistant';
-                    this._saveMessages();
                 }
+
+                this._messages[this._messages.length - 1].content = newMessage;
+                this._messages[this._messages.length - 1].role = sender;
+                this._saveMessages();
                 i++;
 
                 if (this._cancelToken) {
@@ -421,18 +372,17 @@ export class ChatView implements vscode.WebviewViewProvider {
             });
 
             stream.on('end', () => {
-                if (funcName === 'chat') {
-                    this._view?.webview.postMessage({
-                        command: 'chatStreaming',
-                        isCompletionEnd: true
-                    });
+                this._view?.webview.postMessage({
+                    command: 'chatStreaming',
+                    isCompletionEnd: true
+                });
 
-                    if (inputFromWebview) {
-                        this._focusInputBox();
-                    }
+                if (inputFromWebview) {
+                    this._focusInputBox();
                 }
-                else {
-                    // Parse the function call and return the result to streamcompletion
+
+                // Parse the function call and return the result to streamcompletion
+                if (funcName !== 'chat') {
                     this._handleFunctions(funcName, JSON.parse(newMessage), inputFromWebview);
                 }
 

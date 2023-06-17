@@ -39,7 +39,7 @@ async function preprocessMessages(messages: IMessage[]) {
     let newMessages: IMessage[] = [];
 
     messages.forEach((msg) => {
-        console.log(msg);
+        // console.log(msg);
         let role = msg.role || "user";
         let hiddenContext = msg.hiddenContext || "";
         let content = msg.content || "";

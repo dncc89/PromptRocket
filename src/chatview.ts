@@ -129,7 +129,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 case 'userMessage':
                     this.sendUserMessage(message.text, true, true);
                     break;
-                case 'userMessageModify'
+                case 'userMessageModify':
                     this._updateMessageArray(message.id);
                     this._returnMessage(message.text, 'user', '', true);
                     break;
@@ -494,7 +494,7 @@ export class ChatView implements vscode.WebviewViewProvider {
 
     private async _findAndSelectText(text: string) {
         const result = JSON.stringify(await utils.findAndSelectText(text), null, 2);
-        return `{ "text_selected": ${result} }`;
+        return `{ "text_selected":'successful' }`;
     }
 
     // Save message array to globalState

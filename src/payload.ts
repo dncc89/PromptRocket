@@ -33,6 +33,51 @@ export async function generatePayload(messages: IMessage[], apiKey: string, func
     return payload;
 }
 
+export async function generateSearchPayload(filename: string, text: string, apiKey: string) {
+    const config = vscode.workspace.getConfiguration('promptrocket');
+    const context = await utils.readWholeFile(filename);
+
+    const newMessages: IMessage[] = [
+        {
+            role: "user",
+            content: `Context:\n\`\`\`${context}\`\`\`\n\nFind a relavant context block for this request and return it in binary: ${text}`,
+        }
+    ];
+
+    let body: any = {
+        model: "gpt-3.5-turbo-16k-0613",
+        temperature: 0,
+        messages: newMessages,
+        functions: [
+            {
+                "name": "convert_to_binary",
+                "description": "Converts given text to binary",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The text to convert",
+                        },
+                    },
+                    "required": ["text"],
+                },
+            },
+        ],
+    };
+
+    const payload = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+    };
+
+    return payload;
+}
+
 async function preprocessMessages(messages: IMessage[]) {
     const language = await utils.getLanguageID();
     const context = await utils.getContext() || ['', '', ''];

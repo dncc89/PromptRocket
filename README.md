@@ -45,6 +45,9 @@ Retrieves symbols from a file.
 
 Reads diagnostics for code. This often confuses AI semantic error and syntax error.
 
+- Search file
+Utilizing GPT-3.5-Turbo-16k, it feeds a whole file into another agent to find a relevant text or code block in any file in the project.
+
 - Send text
 
 Insert text directly into editor
@@ -67,10 +70,10 @@ Our chat mode lets you start a blank chat or use a custom template. Some templat
 - **New Chat** - Launches a new, empty chat free of templates.
 - **Open Chat Template** - Begins a chat utilizing a personalized template.
 
-## Simplified Command Mode
-Catering to your need for a streamlined experience, our command mode operates directly within the editor. It's perfect for uncomplicated tasks, such as generating code snippets or incorporating comments. GPT-4 compatibility makes it a recommended choice.
+## Message Shortcuts 
+Message shortcuts lets you type less for repeatables, such as writing comments for the code, give code snippets, etc. This can be combined with commands like *Insert into editor*, so end result can be directly written into your editor.
 
-- **Run Editor Command** - Executes a command inside the editor, specifically designed for template mode. 
+- **Open Message Shortcut** - Opens a list of message shortcuts. 
 Shortcut is **ctrl(cmd) + shift + ;**.
 
 ## Extra functions

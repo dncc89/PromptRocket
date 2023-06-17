@@ -245,7 +245,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             this._messages.push(requestMessage);
             this._saveMessages();
 
-            if (this._currentLoop > 3 && requester === 'function') {
+            if (this._currentLoop > 10 && requester === 'function') {
                 return;
             }
 
@@ -334,6 +334,24 @@ export class ChatView implements vscode.WebviewViewProvider {
                             },
                         },
                         "required": ["text"],
+                    },
+                },
+                {
+                    "name": "search_text",
+                    "description": "Runs an advanced AI search engine to find a relevant text in the file.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "filename": {
+                                "type": "string",
+                                "description": "File name to search text, return empty string to search current file",
+                            },
+                            "query": {
+                                "type": "string",
+                                "description": "Use natural language query, e.g. Where is the function to get the current time."
+                            },
+                        },
+                        "required": ["filename", "query"],
                     },
                 },
                 {
@@ -439,6 +457,9 @@ export class ChatView implements vscode.WebviewViewProvider {
             case 'run_command':
                 result = await this._runCommand(request.command);
                 break;
+            case 'search_text':
+                result = await this._searchText(request.filename, request.query);
+                break;
             case 'find_and_select_text':
                 result = await this._findAndSelectText(request.text);
                 break;
@@ -496,6 +517,13 @@ export class ChatView implements vscode.WebviewViewProvider {
         {
             return `{ "command_sent": 'command not found' }`;
         }
+    }
+
+    private async _searchText(filename: string, query: string) {
+        const p = await payload.generateSearchPayload(filename, query, this._apiKey);
+        const response = await message.simpleCompletion(p);
+        const result = JSON.stringify(response, null, 2);
+        return `{ "search_result": ${result} }`;
     }
 
     private async _findAndSelectText(text: string) {

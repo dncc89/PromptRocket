@@ -55,7 +55,7 @@
         "mac": "cmd+shift+'"
       },
       {
-        "command": "promptrocket.openCommandTemplate",
+        "command": "promptrocket.openMessageShortcut",
         "key": "ctrl+shift+;",
         "mac": "cmd+shift+;"
       }

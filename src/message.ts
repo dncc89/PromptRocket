@@ -85,3 +85,19 @@ export const streamCompletion = (payload: any) => {
 
     return emitter;
 };
+
+export const simpleCompletion = async (payload: any) => {
+    try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", payload);
+        if (!response.ok) {
+            throw new Error(JSON.stringify(response));
+        }
+        const data = await response.json();
+        console.log(data);
+        const text = data.choices[0].message.function_call.arguments;
+        return JSON.parse(text).text;
+    } catch (error) {
+        console.error(error);
+        vscode.window.showErrorMessage("PromptRocket: There was an error while connecting to OpenAI API");
+    }
+};

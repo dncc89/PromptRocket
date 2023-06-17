@@ -223,3 +223,27 @@ export async function findAndSelectText(text: string) {
     }
     return result;
 }
+
+export async function readWholeFile(filename: string) {
+    let result = 'no active editor';
+    let editor = vscode.window.activeTextEditor;
+    if (editor) {
+        if (!filename) {
+            const document = editor.document;
+            result = document.getText();
+        } else {
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (workspaceFolders) {
+                const workspaceFolder = workspaceFolders[0];
+                const filePath = path.join(workspaceFolder.uri.fsPath, filename);
+                if (fs.existsSync(filePath)) {
+                    result = fs.readFileSync(filePath).toString();
+                }
+                else {
+                    result = 'file not found';
+                }
+            }
+        }
+    }
+    return result;
+}

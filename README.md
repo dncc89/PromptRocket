@@ -11,6 +11,7 @@ Here are some core principles of PromptRocket:
 1. **Autonomous agent**
 
  PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself! 
+ 
  Warning: It might destroy your working code or the whole project, use it with caution.
 
 2. **Ensure full customization of the model and prompts**

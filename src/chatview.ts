@@ -37,7 +37,6 @@ export class ChatView implements vscode.WebviewViewProvider {
         this._messages = messages;
         this._cancelToken = true;
         this._saveMessages();
-        console.log(this._messages);
 
         if (this._messages.length === 0) {
             // Add default system message if there are no messages
@@ -66,6 +65,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 this._initialMessageLength = this._messages.length;
             }
         }
+        console.log(this._messages);
     }
 
     insertLastCodeblock() {
@@ -127,8 +127,11 @@ export class ChatView implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage((message) => {
             switch (message.command) {
                 case 'userMessage':
-                    this._updateMessageArray(message.id);
                     this.sendUserMessage(message.text, true, true);
+                    break;
+                case 'userMessageModify':
+                    this._updateMessageArray(message.id);
+                    this._returnMessage(message.text, 'user', '', true);
                     break;
                 case 'copyToClipboard':
                     vscode.env.clipboard.writeText(message.text);

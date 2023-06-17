@@ -290,7 +290,7 @@ function displayMessage(text, sender, isNewMessage) {
 
                     vscode.postMessage({
                         id: messages.length,
-                        command: 'userMessage',
+                        command: 'userMessageModify',
                         text: newMessage
                     });
                 }

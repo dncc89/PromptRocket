@@ -154,9 +154,10 @@ export async function getDiagnostics() {
     const activeEditor = vscode.window.activeTextEditor;
     const activeDocument = activeEditor?.document;
     const selection = activeEditor?.selection;
-    const startPosition = selection?.start.translate(-5, 0);
-    const endPosition = selection?.end.translate(5, 0);
-
+    const startPosition = selection?.start.line || 0 - 5 < 0 ? 0 : selection?.start.translate(-5, 0);
+    const documentLength = activeDocument?.lineCount || 0;
+    const endLine = selection?.end.line || 0;
+    const endPosition = endLine + 5 > documentLength ? new vscode.Position(documentLength, 0) : selection?.end.translate(5, 0);
     let errorMessages = [];
     if (startPosition && endPosition && activeDocument) {
         const diagnostics = vscode.languages.getDiagnostics(activeDocument.uri);

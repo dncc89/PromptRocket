@@ -1,6 +1,6 @@
 # PromptRocket (Experimental)
 
-![Intro](https://i.imgur.com/maLt7mn.gif, "Intro")
+![Intro](https://i.imgur.com/ekNiaey.gif, "Intro")
 
 PromptRocket is an experimental VSCode co-pilot extension, based on autonomous behavior. Besides of its basic functions like having a chat panel on your editor, it drives VSCode by itself to achieve given goals. 
 Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.

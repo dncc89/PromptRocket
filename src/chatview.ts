@@ -129,7 +129,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 case 'userMessage':
                     this.sendUserMessage(message.text, true, true);
                     break;
-                case 'userMessageModify':
+                case 'userMessageModify'
                     this._updateMessageArray(message.id);
                     this._returnMessage(message.text, 'user', '', true);
                     break;
@@ -483,13 +483,13 @@ export class ChatView implements vscode.WebviewViewProvider {
     private async _insertText(text: string) {
         utils.replaceSelectedText(text);
         const result = JSON.stringify(text, null, 2);
-        return `{ "text_sent": ${result} }`;
+        return `{ "text_sent": 'successful' }`;
     }
 
     private async _runCommand(text: string) {
         await vscode.commands.executeCommand(text);
         const result = JSON.stringify(text, null, 2);
-        return `{ "command_sent": ${result} }`;
+        return `{ "command_sent": 'successful' }`;
     }
 
     private async _findAndSelectText(text: string) {

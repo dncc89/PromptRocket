@@ -483,18 +483,29 @@ export class ChatView implements vscode.WebviewViewProvider {
     private async _insertText(text: string) {
         utils.replaceSelectedText(text);
         const result = JSON.stringify(text, null, 2);
-        return `{ "text_sent": 'successful' }`;
+        return `{ "text_sent": ${result} }`;
     }
 
     private async _runCommand(text: string) {
-        await vscode.commands.executeCommand(text);
-        const result = JSON.stringify(text, null, 2);
-        return `{ "command_sent": 'successful' }`;
+        try {
+            await vscode.commands.executeCommand(text);
+            const result = JSON.stringify(text, null, 2);
+            return `{ "command_sent": ${result} }`;
+        }
+        catch
+        {
+            return `{ "command_sent": 'command not found' }`;
+        }
     }
 
     private async _findAndSelectText(text: string) {
-        const result = JSON.stringify(await utils.findAndSelectText(text), null, 2);
-        return `{ "text_selected":'successful' }`;
+        try {
+            await utils.findAndSelectText(text);
+            return `{ "text_selected":'successful' }`;
+        }
+        catch {
+            return `{ "text_selected":'failed' }`;
+        }
     }
 
     // Save message array to globalState

@@ -26,7 +26,7 @@ PromptRocket tracks chat history and recognizes your text selections, as well as
 
 I promise there won't be any flashy elements in the panel.
 
-# Ability
+## Abilities
 PromptRocket currently has following functions to communicate with VSCode.
 
 - Get context

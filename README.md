@@ -26,6 +26,37 @@ PromptRocket tracks chat history and recognizes your text selections, as well as
 
 I promise there won't be any flashy elements in the panel.
 
+# Ability
+PromptRocket currently has following functions to communicate with VSCode.
+
+- Get context
+
+Reads context around your cursor and text selection.
+
+- Get project files
+
+Lists whole project files except gitignored ones.
+
+- Get symbols
+
+Retrieves symbols from a file.
+
+- Get diagnostics
+
+Reads diagnostics for code. This often confuses AI semantic error and syntax error.
+
+- Send text
+
+Insert text directly into editor
+
+- Find and select text
+
+Finds text, if there is multiple candidates selects the one closest to the cursor.
+
+- Run command
+
+Runs vscode command, this is relying on ChatGPT's knowledge, function might behave different in the newer VSCode. 
+
 
 # How to Use
 PromptRocket provides two ways of use, chat mode and command mode.

@@ -93,7 +93,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             this._postMessage(text, 'user');
             if (startCompletion) {
                 this._currentLoop = 0;
-                await this._returnMessage(text, 'user', inputFromWebview);
+                await this._returnMessage(text, 'user', '', inputFromWebview);
             }
         }
 
@@ -220,7 +220,7 @@ export class ChatView implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _returnMessage(text: string, requester: string, inputFromWebview: boolean) {
+    private async _returnMessage(text: string, requester: string, functionName: string = "", inputFromWebview: boolean) {
         try {
             // Get text selectio
             const selection = await utils.getContext();
@@ -237,6 +237,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 role: requester,
                 hiddenContext: context,
                 content: text,
+                name: functionName,
             };
             this._messages.push(requestMessage);
             this._saveMessages();
@@ -245,7 +246,6 @@ export class ChatView implements vscode.WebviewViewProvider {
                 return;
             }
 
-            this._messages = await message.preprocessMessages(this._messages);
             this._cancelToken = false;
             const maxLines = this._config.get<number>('contextLength') || 20;
             const cmd = [
@@ -388,30 +388,30 @@ export class ChatView implements vscode.WebviewViewProvider {
 
             let i = 0;
             let newMessage = '';
-
             let funcName = 'chat';
             stream.on('data', (chunk) => {
                 funcName = chunk[0];
-                this._view?.webview.postMessage({
-                    command: 'chatStreaming',
-                    text: chunk[1],
-                    sender: funcName === 'chat' ? 'assistant' : 'function',
-                    isNewMessage: i === 0
-                });
-
                 newMessage += chunk[1];
-                const sender = funcName === 'chat' ? 'assistant' : 'function';
 
-                if (i === 0) {
-                    this._messages.push({
-                        role: sender,
-                        content: newMessage,
-                        name: funcName
+                if (funcName === 'chat') {
+                    this._view?.webview.postMessage({
+                        command: 'chatStreaming',
+                        text: chunk[1],
+                        sender: 'assistant',
+                        isNewMessage: i === 0
                     });
+
+                    if (i === 0) {
+                        this._messages.push({
+                            role: 'assistant',
+                            content: newMessage
+                        });
+                    }
+
+                    this._messages[this._messages.length - 1].content = newMessage;
+                    this._messages[this._messages.length - 1].role = 'assistant';
+                    this._saveMessages();
                 }
-                this._messages[this._messages.length - 1].content = newMessage;
-                this._messages[this._messages.length - 1].role = sender;
-                this._saveMessages();
                 i++;
 
                 if (this._cancelToken) {
@@ -421,19 +421,21 @@ export class ChatView implements vscode.WebviewViewProvider {
             });
 
             stream.on('end', () => {
-                this._view?.webview.postMessage({
-                    command: 'chatStreaming',
-                    isCompletionEnd: true
-                });
+                if (funcName === 'chat') {
+                    this._view?.webview.postMessage({
+                        command: 'chatStreaming',
+                        isCompletionEnd: true
+                    });
 
-                if (inputFromWebview) {
-                    this._focusInputBox();
+                    if (inputFromWebview) {
+                        this._focusInputBox();
+                    }
                 }
-
-                if (funcName !== 'chat') {
+                else {
                     // Parse the function call and return the result to streamcompletion
                     this._handleFunctions(funcName, JSON.parse(newMessage), inputFromWebview);
                 }
+
                 // Reset the current message for the next message
                 newMessage = '';
                 this._currentLoop++;
@@ -476,7 +478,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             result = "['function failed. return to conversation for further instruction.']";
         }
         this._postMessage(result, 'function');
-        this._returnMessage(result, 'function', inputFromWebview);
+        this._returnMessage(result, 'function', funcName, inputFromWebview);
     }
 
     private async _getContext(lines: number) {
@@ -510,13 +512,13 @@ export class ChatView implements vscode.WebviewViewProvider {
     private async _insertText(text: string) {
         utils.replaceSelectedText(text);
         const result = JSON.stringify(text, null, 2);
-        return `{ "text_sent": ${result} }}`;
+        return `{ "text_sent": ${result} }`;
     }
 
     private async _runCommand(text: string) {
         await vscode.commands.executeCommand(text);
         const result = JSON.stringify(text, null, 2);
-        return `{ "command_sent": ${result} }}`;
+        return `{ "command_sent": ${result} }`;
     }
 
     // Save message array to globalState

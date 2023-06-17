@@ -85,34 +85,3 @@ export const streamCompletion = (payload: any) => {
 
     return emitter;
 };
-
-export async function preprocessMessages(messages: IMessage[]) {
-    const language = await utils.getLanguageID();
-    const context = await utils.getContext() || ['', '', ''];
-    let newMessages: IMessage[] = [];
-
-    messages.forEach((msg) => {
-        let role = msg.role || "user";
-        let hiddenContext = msg.hiddenContext || "";
-        let content = msg.content || "";
-
-        content = content.replace(/{{language}}/g, language);
-        content = content.replace(/{{context_before}}/g, context[0]);
-        content = content.replace(/{{selected_text}}/g, context[1]);
-        content = content.replace(/{{context_after}}/g, context[2]);
-
-        if (hiddenContext.length > 0) {
-            hiddenContext = `Context: \`\`\`${hiddenContext}\`\`\`\n`;
-        }
-
-        const newMessage: IMessage = {
-            role: role,
-            hiddenContext: hiddenContext,
-            content: content,
-        };
-
-        newMessages.push(newMessage);
-    });
-
-    return newMessages;
-}

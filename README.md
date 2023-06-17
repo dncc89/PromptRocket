@@ -13,15 +13,15 @@ Here are some core principles of PromptRocket:
  PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself! 
  Warning: It might destroy your working code or the whole project, use it with caution.
 
-2. **Ensure full customization of the model and prompts.**
+2. **Ensure full customization of the model and prompts**
 
  It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
 
-3. **It should remember chat history while keeping track of text selections.**
+3. **It should remember chat history while keeping track of text selections**
 
 PromptRocket tracks chat history and recognizes your text selections, as well as the context surrounding them. The main purpose of this extension is to boost brainstorming by integrating ChatGPT's conversational format into VSCode.
 
-4. **Maintain a simple and tidy UI that doesn't disrupt visuals.**
+4. **Maintain a simple and tidy UI that doesn't disrupt visuals**
 
 I promise there won't be any flashy elements in the panel.
 

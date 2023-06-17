@@ -473,12 +473,12 @@ export class ChatView implements vscode.WebviewViewProvider {
 
     // Save message array to globalState
     private _saveMessages() {
-        // this._globalState.update('messages', this._messages);
+        this._globalState.update('messages', this._messages);
     }
 
     // Load message array from globalState
     private _loadMessages() {
-        // this._messages = this._globalState.get('messages', []) as IMessage[];
+        this._messages = this._globalState.get('messages', []) as IMessage[];
     }
 
     private _focusInputBox() {

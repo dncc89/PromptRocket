@@ -1,10 +1,9 @@
 import * as templates from './templates';
 import * as vscode from 'vscode';
 
-import { ICommand, IMessage } from './interfaces';
+import { ICommandTemplate, IMessage, IMessageTemplate } from './interfaces';
 
 import { ChatView } from './chatview';
-import { EditorCommand } from './editorCommand';
 
 export async function activate(context: vscode.ExtensionContext) {
     // Check if API key is set
@@ -28,7 +27,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Create chat view
     let chatview = new ChatView(context, apiKey);
-    let command = new EditorCommand(context, apiKey);
 
     let disposableNewChat = vscode.commands.registerCommand("promptrocket.newChat", async () => {
         chatview.startNewChat([], '');
@@ -46,7 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Register the "promptrocket.commandFromTemplates" command and handle user input
     let disposableOpenChatTemplate = vscode.commands.registerCommand("promptrocket.openChatTemplate", async () => {
         // Add quickpick list in the chat template command
-        let templateList: ICommand[] = templates.getChatTemplates();
+        let templateList: ICommandTemplate[] = templates.getChatTemplates();
         let quickPickItems: vscode.QuickPickItem[] = templateList.map(template => ({ label: template.name }));
         quickPickItems.push({ label: "+ Add new template" });
 
@@ -77,26 +75,26 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    let disposableOpenCommandTemplate = vscode.commands.registerCommand("promptrocket.openCommandTemplate", async () => {
+    let disposableOpenMessageShortcut = vscode.commands.registerCommand("promptrocket.openMessageShortcut", async () => {
         // Add quickpick list in the chat template command
-        let templateList: ICommand[] = templates.getCommandTemplates();
+        let templateList: IMessageTemplate[] = templates.getMessageTemplates();
         let quickPickItems: vscode.QuickPickItem[] = templateList.map(template => ({ label: template.name }));
         quickPickItems.push({ label: "+ Add new template" });
 
         let selectedTemplate = await vscode.window.showQuickPick(quickPickItems, {
-            placeHolder: "Select a template or add a new one",
+            placeHolder: "Select a shortcut or add a new one",
         });
 
         if (selectedTemplate) {
             if (selectedTemplate.label === "+ Add new template") {
-                vscode.commands.executeCommand("workbench.action.openSettings", "promptrocket.chatTemplates");
+                vscode.commands.executeCommand("workbench.action.openSettings", "promptrocket.messageShortcuts");
             } else {
                 // If template has argument enabled, show input box
-                const commandTemplate = templates.findCommandTemplates(selectedTemplate.label);
+                const messageTemplate = templates.findMessageTemplate(selectedTemplate.label);
                 let argument = "";
 
-                if (commandTemplate.argument) {
-                    if (commandTemplate.argument) {
+                if (messageTemplate.argument) {
+                    if (messageTemplate.argument) {
                         argument = await vscode.window.showInputBox({
                             prompt: "What's on your mind?",
                         }) || "";
@@ -106,9 +104,11 @@ export async function activate(context: vscode.ExtensionContext) {
                     if (argument === "") {
                         return;
                     }
+                    chatview.sendUserMessage(`${messageTemplate.prompt}: "${argument}"`, true, false);
                 }
-
-                command.runCommand(commandTemplate.prompts || [], argument);
+                else {
+                    chatview.sendUserMessage(`${messageTemplate.prompt}`, true, false);
+                }
             }
         }
     });
@@ -129,7 +129,8 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposableOpenSettings);
     context.subscriptions.push(disposableNewChat);
     context.subscriptions.push(disposableOpenChatTemplate);
-    context.subscriptions.push(disposableOpenCommandTemplate);
+    context.subscriptions.push(disposableOpenMessageShortcut);
+    context.subscriptions.push(disposableInsertCodeblock);
     context.subscriptions.push(disposableSetKey);
     context.subscriptions.push(disposableShowChatPanel);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(ChatView.viewType, chatview));

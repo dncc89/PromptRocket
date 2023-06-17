@@ -16,13 +16,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "promptrocket.openChatTemplate",
-        "title": "PromptRocket: Open Chat Template",
+        "command": "promptrocket.openMessageShortcut",
+        "title": "PromptRocket: Open Message Shortcut",
         "icon": "$(beaker)"
       },
       {
-        "command": "promptrocket.openCommandTemplate",
-        "title": "PromptRocket: Run Editor Command",
+        "command": "promptrocket.openChatTemplate",
+        "title": "PromptRocket: Open Chat Template",
         "icon": "$(github-action)"
       },
       {
@@ -91,7 +91,7 @@
           "group": "navigation@1"
         },
         {
-          "command": "promptrocket.openCommandTemplate",
+          "command": "promptrocket.openMessageShortcut",
           "when": "view == promptrocket.view",
           "group": "navigation@2"
         },
@@ -155,6 +155,31 @@
           "default": "You are the most powerful and advanced AI powered code editor called PromptRocket, who is expert in various languages and algorithms. You perform an action directly to the editor upon request with provided functions. Think first where user wants you to respond. Try to answer short, clear and consise.",
           "description": "Default system message"
         },
+        "promptrocket.messageShortcuts": {
+          "type": "array",
+          "default": [
+            {
+              "name": "1. Insert a comment",
+              "argument": false,
+              "prompt": "Analyze code below cursor and insert a comment in the editor"
+            },
+            {
+              "name": "2. Find an error and suggest a solution",
+              "argument": false,
+              "prompt": "Find an error around the cursor and suggest a solution"
+            },
+            {
+              "name": "3. Autocomplete the code",
+              "argument": false,
+              "prompt": "Read the context around the cursor and autocmplete the code, prompt before inserting int o editor."
+            },
+            {
+              "name": "4. Code snippet",
+              "argument": true,
+              "prompt": "Write a code snippet for this:"
+            }
+          ]
+        },
         "promptrocket.chatTemplates": {
           "type": "array",
           "default": [
@@ -174,7 +199,8 @@
                   "role": "user",
                   "content": "Please identify any issues with this code and suggest how to fix them."
                 }
-              ]
+              ],
+              "description": "Message shortcut templates"
             },
             {
               "name": "2. Refactor Code",
@@ -259,67 +285,7 @@
               ]
             }
           ],
-          "description": "Array of command templates for the Mini AI extension"
-        },
-        "promptrocket.commandTemplates": {
-          "type": "array",
-          "default": [
-            {
-              "name": "1. Autocomplete code",
-              "argument": false,
-              "prompts": [
-                {
-                  "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Modify the code based on the given context."
-                },
-                {
-                  "role": "user",
-                  "content": "We're using {{language}}."
-                },
-                {
-                  "role": "user",
-                  "content": "This is the context above the cursor:\\n```{{context_before}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "This is the context below the cursor:\\n```{{context_after}}```"
-                },
-                {
-                  "role": "user",
-                  "content": "Please write the code goes between the context."
-                }
-              ]
-            },
-            {
-              "name": "2. Write a Code Snippet",
-              "argument": true,
-              "prompts": [
-                {
-                  "role": "system",
-                  "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Write a code snippet based on the given context."
-                },
-                {
-                  "role": "user",
-                  "content": "Language: {{language}} \nRequest: {{argument}}"
-                }
-              ]
-            },
-            {
-              "name": "3. Write a Comment",
-              "argument": false,
-              "prompts": [
-                {
-                  "role": "system",
-                  "content": "You are the most powerful code analyzer."
-                },
-                {
-                  "role": "user",
-                  "content": "Write a comment for this code: ```{{language}} {{context_after}}```"
-                }
-              ]
-            }
-          ],
-          "description": "Array of command templates for the Mini AI extension"
+          "description": "Array of command templates"
         }
       }
     }

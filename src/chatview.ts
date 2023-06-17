@@ -501,7 +501,8 @@ export class ChatView implements vscode.WebviewViewProvider {
     private async _findAndSelectText(text: string) {
         try {
             await utils.findAndSelectText(text);
-            return `{ "text_selected":'successful' }`;
+            const result = JSON.stringify(text, null, 2);
+            return `{ "text_selected":${result} }`;
         }
         catch {
             return `{ "text_selected":'failed' }`;

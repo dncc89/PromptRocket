@@ -1,7 +1,13 @@
-export interface ICommand {
+export interface ICommandTemplate {
     name: string;
     argument?: boolean;
     prompts?: IMessage[];
+}
+
+export interface IMessageTemplate {
+    name: string;
+    argument?: boolean;
+    prompt: string;
 }
 
 export interface IMessage {

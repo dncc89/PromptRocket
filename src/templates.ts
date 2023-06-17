@@ -1,27 +1,27 @@
 import * as vscode from 'vscode';
 
-import { ICommand } from './interfaces';
+import { ICommandTemplate, IMessageTemplate } from './interfaces';
 
 export function getChatTemplates() {
     const config = vscode.workspace.getConfiguration("promptrocket");
-    let templates: ICommand[] = config.get("chatTemplates", []);
+    let templates: ICommandTemplate[] = config.get("chatTemplates", []);
     return templates;
 }
 
 export function findChatTemplates(name: string) {
-    const emptyCommand: ICommand = { name: "" };
-    const template: ICommand = getChatTemplates().find((template: ICommand) => template.name === name) || emptyCommand;
+    const emptyCommand: ICommandTemplate = { name: "" };
+    const template: ICommandTemplate = getChatTemplates().find((template: ICommandTemplate) => template.name === name) || emptyCommand;
     return template;
 }
 
-export function getCommandTemplates() {
+export function getMessageTemplates() {
     const config = vscode.workspace.getConfiguration("promptrocket");
-    let templates: ICommand[] = config.get("commandTemplates", []);
+    let templates: IMessageTemplate[] = config.get("messageShortcuts", []);
     return templates;
 }
 
-export function findCommandTemplates(name: string) {
-    const emptyCommand: ICommand = { name: "" };
-    const template: ICommand = getCommandTemplates().find((template: ICommand) => template.name === name) || emptyCommand;
+export function findMessageTemplate(name: string) {
+    const emptyCommand: IMessageTemplate = { name: "", prompt: "" };
+    const template: IMessageTemplate = getMessageTemplates().find((template: IMessageTemplate) => template.name === name) || emptyCommand;
     return template;
 }

@@ -1,7 +1,7 @@
 import * as utils from './utils';
 import * as vscode from 'vscode';
 
-import { ICommand, IMessage } from './interfaces';
+import { ICommandTemplate, IMessage } from './interfaces';
 
 export async function generatePayload(messages: IMessage[], apiKey: string, functions: any = []) {
     const config = vscode.workspace.getConfiguration('promptrocket');
@@ -54,9 +54,6 @@ async function preprocessMessages(messages: IMessage[]) {
         content = content.replace(/{{context_before}}/g, context[0]);
         content = content.replace(/{{selected_text}}/g, context[1]);
         content = content.replace(/{{context_after}}/g, context[2]);
-
-        if (hiddenContext.length > 0) {
-        }
 
         const newMessage: IMessage = {
             role: role,

@@ -33,6 +33,7 @@ export class ChatView implements vscode.WebviewViewProvider {
     }
 
     startNewChat(messages: IMessage[], argument: string) {
+        this._initToggle();
         this._resetWebview();
         this._messages = messages;
         this._cancelToken = true;
@@ -153,6 +154,9 @@ export class ChatView implements vscode.WebviewViewProvider {
                     this._config.update('model', message.text, true);
                     this._postMessage(`Model changed to ${message.text}`, 'system');
                     break;
+                case 'toggleFunctions':
+                    this._toggleFunctions();
+                    break;
             }
         });
     }
@@ -251,7 +255,7 @@ export class ChatView implements vscode.WebviewViewProvider {
 
             this._cancelToken = false;
             const maxLines = this._config.get<number>('contextLength') || 20;
-            const cmd = [
+            let cmd = [
                 {
                     "name": "get_context",
                     "description": "Retrieve what user is currently looking at",
@@ -369,6 +373,10 @@ export class ChatView implements vscode.WebviewViewProvider {
                     },
                 }
             ];
+
+            if (!this._globalState.get('useFunctions')) {
+                cmd = [];
+            }
 
             const p = await payload.generatePayload(this._messages, this._apiKey, cmd);
             const stream = message.streamCompletion(p);
@@ -550,6 +558,28 @@ export class ChatView implements vscode.WebviewViewProvider {
     private _focusInputBox() {
         this._view?.webview.postMessage({
             command: "focusInputBox"
+        });
+    }
+
+    private _initToggle() {
+        // Check if the globalState has the 'useFunctions' key
+        if (!this._globalState.get('useFunctions')) {
+            // If not, initialize it to false
+            this._globalState.update('useFunctions', true);
+        }
+        this._view?.webview.postMessage({
+            command: "initializeFunctions",
+            useFunctions: this._globalState.get('useFunctions')
+        });
+    }
+
+    private _toggleFunctions() {
+        // Get the current state of the functions in globalState
+        const currentState = this._globalState.get('useFunctions');
+        this._globalState.update('useFunctions', !currentState);
+        this._view?.webview.postMessage({
+            command: "toggleFunctions",
+            useFunctions: !currentState
         });
     }
 }

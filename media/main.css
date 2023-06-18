@@ -37,11 +37,45 @@ app {
     display: flex;
     flex-direction: row;
     justify-content: left;
+    align-items: center;
     border-top: 1px solid var(--vscode-activityBar-border);
 }
 
+.button-toggle-on {
+    display: flex;
+    border-radius: 3px;
+    border: none;
+    outline: none;
+    background: var(--vscode-focusBorder);
+    color: var(--vscode-inputOption-activeForeground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 10px 5px 0px;
+    padding: 7px 10px 7px 10px;
+}
+
+.button-toggle-off {
+    display: flex;
+    border-radius: 3px;
+    border: none;
+    outline: none;
+    background: var(--vscode-dropdown-background);
+    color: var(--vscode-symbolIcon-enumMemberForeground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 10px 5px 0px;
+    padding: 7px 10px 7px 10px;
+}
+
+.button-toggle-off:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    color: var(--vscode-inputOption-activeForeground);
+}
+
 select {
-    margin: 10px 10px 5px 10px;
+    margin: 10px 5px 5px 10px;
     padding: 5px;
     flex: 1;
     background: var(--vscode-dropdown-background);
@@ -227,7 +261,7 @@ textarea:focus {
     width: 25px;
     /* height: 25px; */
     /* margin-top: 1px; */
-    right: 21px;
+    right: 15px;
     bottom: 16px;
     margin-left: 5px;
     background: transparent;
@@ -267,6 +301,7 @@ textarea:focus {
     justify-content: center;
 }
 
+
 .button-icon:hover {
     background: var(--vscode-toolbar-hoverBackground);
 }
@@ -274,6 +309,8 @@ textarea:focus {
 .button-icon:disabled {
     background: transparent;
 }
+
+
 
 .text-button-container {
     z-index: 9999;

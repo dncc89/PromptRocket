@@ -4,6 +4,7 @@ const outputContainer = document.getElementById('output-container');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const modelDropdown = document.getElementById('model-select');
+const functionToggle = document.getElementById('function-toggle');
 const thinkingTexts = ['.', '..', '...', '....', '.....'];
 let inputPlaceholder = '';
 let counter = 0;
@@ -104,6 +105,24 @@ const loadingInterval = setInterval(() => {
     counter++;
 }, 300);
 
+
+functionToggle.addEventListener('click', function () {
+    vscode.postMessage({
+        command: 'toggleFunctions'
+    });
+});
+
+function toggleFunctions(useFunctions) {
+    if (useFunctions) {
+        functionToggle.classList.add('button-toggle-on');
+        functionToggle.classList.remove('button-toggle-off');
+    }
+    else {
+        functionToggle.classList.add('button-toggle-off');
+        functionToggle.classList.remove('button-toggle-on');
+    }
+}
+
 sendButton.addEventListener('click', () => {
     if (isStreaming) {
         handleMessage({ data: { command: 'chatMessage', isCompletionEnd: true } });
@@ -183,6 +202,9 @@ function handleMessage(event) {
             displayMessage(message.text, message.sender, true);
             currentWrapper = null;
             currentText = '';
+            break;
+        case 'toggleFunctions':
+            toggleFunctions(message.useFunctions);
             break;
     }
     bindCodeButtonEvents();

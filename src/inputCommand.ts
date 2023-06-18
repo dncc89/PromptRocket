@@ -18,9 +18,6 @@ export class InputCommand {
         const cmd = split[0];
         const args = split[1];
 
-        // Update
-        config = vscode.workspace.getConfiguration("promptrocket");
-
         if (cmd === '/clear') {
             vscode.commands.executeCommand('promptrocket.newChat');
         }

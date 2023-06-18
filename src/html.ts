@@ -59,6 +59,7 @@ export function getHtmlForWebview(context: vscode.ExtensionContext, webview: vsc
                     <option value="gpt-3.5-turbo-16k-0613" ${modelName === "gpt-3.5-turbo-16k-0613" ? "selected" : ""}>gpt-3.5-turbo-16k-0613</option>
                     <option value="gpt-4-0613" ${modelName === "gpt-4-0613" ? "selected" : ""}>gpt-4-0613</option>
                 </select>
+                <button class="button-toggle-on" id="function-toggle"><i class='fa-solid fa-bolt'></i></button>
             </div>
 	        <div id="input-container">
                 <textarea class="inputbox" id="user-input" rows="1" placeholder="'/help' to see quick commands."></textarea>

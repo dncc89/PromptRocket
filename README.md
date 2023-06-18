@@ -1,97 +1,82 @@
 # PromptRocket (Experimental)
 
-![Intro](https://i.imgur.com/ekNiaey.gif, "Intro")
+![Intro](https://i.imgur.com/ekNiaey.gif "Intro")
 
-PromptRocket is an experimental VSCode autopilot extension, based on the OpenAI's the newest function call API. Besides of its basic functions like having a chat panel on your editor, it drives VSCode by itself to achieve given goals. 
-Check out the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket) for more details and updates.
+PromptRocket is an experimental autopilot extension for VSCode leveraging the power of OpenAI's latest function call API. It's not just about having a chat panel in your editor, but also letting it drive VSCode autonomously to reach given targets. Discover more details and updates on the [PromptRocket GitHub repository](https://github.com/dncc89/PromptRocket).
 
-## What's the difference in this flood of AI tools?
-Here are some core principles of PromptRocket:
+## What distinguishes it from other AI tools?
+PromptRocket operates based on some core philosophies.
 
 1. **Autonomous agent**
 
- PromptRocket has implemented OpenAI's latest function call update, which allows for fluid interaction between VSCode and PromptRocket. Now, PromptRocket can recursively decide its own actions to perform the requested task. The currently implemented functions include retrieving the context in the current file, retrieving the file list, symbols, and diagnostics project-wide, direct output into the editor, and run VSCode command by itself! 
- 
- Warning: It might destroy your working code or the whole project, use it with caution.
+Using OpenAI's recent function call update, PromptRocket can interact smoothly with VSCode. PromptRocket is now empowered to make recursive action decisions to accomplish the task at hand. Functions currently tackled include context retrieval from the current file, project-wide file list, symbols, and diagnostics retrieval, direct output to the editor, and self-command execution in VSCode. 
 
-2. **Ensure full customization of the model and prompts**
+🚨 Caution: It might mess up your code or the entire project. Use responsibly.
 
- It enables complete customization of the prompt, ranging from the system message to the incorporation of prompt engineering techniques, such as custom system messages, step-by-step thinking, and few-shot prompts, all geared towards eliciting the best possible response from GPT models.
+2. **Fully customizable model and prompts**
 
-3. **It should remember chat history while keeping track of text selections**
+Prompts can be fully customized with PromptRocket. Modification extends from the system message to the use of prompt engineering techniques, like custom system messages, step-by-step thinking, and few-shot prompts. All are designed to extract the most effective response from GPT models.
 
-PromptRocket tracks chat history and recognizes your text selections, as well as the context surrounding them. The main purpose of this extension is to boost brainstorming by integrating ChatGPT's conversational format into VSCode.
+3. **Retains chat history while monitoring text selections**
 
-4. **Maintain a simple and tidy UI that doesn't disrupt visuals**
+PromptRocket remembers the chat history, your text selections, and their context. This extension's primary purpose is to enhance brainstorming by incorporating ChatGPT's conversation format into VSCode.
 
-I promise there won't be any flashy elements in the panel.
+4. **Preserves a minimalistic and neat UI to prevent visual disruption**
+
+No flashy distractions on the panel, that's a promise.
 
 ## Abilities
-PromptRocket currently has following functions to communicate with VSCode.
 
-- Get context
+Here are the current functionalities of PromptRocket that interface with VSCode:
 
-Reads context around your cursor and text selection.
+- **Get context**: Reads the context around your cursor and selected text.
 
-- Get project files
+- **Get project files**: Lists all project files, except those ignored by git.
 
-Lists whole project files except gitignored ones.
+- **Get symbols**: Retrieves symbols from a file.
 
-- Get symbols
+- **Get diagnostics**: Decodes the diagnostics for the code. Often muddles AI semantic errors and syntax errors.
 
-Retrieves symbols from a file.
+- **Search file**: With GPT-3.5-Turbo-16k, it feeds a full file into another agent to find a related text or code block in any file within the project.
 
-- Get diagnostics
+- **Send text**: Injects text directly into the editor.
 
-Reads diagnostics for code. This often confuses AI semantic error and syntax error.
+- **Find and select text**: Searches for text, choose the nearest candidate to the cursor if multiple are present.
 
-- Search file
-Utilizing GPT-3.5-Turbo-16k, it feeds a whole file into another agent to find a relevant text or code block in any file in the project.
-
-- Send text
-
-Insert text directly into editor
-
-- Find and select text
-
-Finds text, if there is multiple candidates selects the one closest to the cursor.
-
-- Run command
-
-Runs vscode command, this is relying on ChatGPT's knowledge, function might behave different in the newer VSCode. 
-
+- **Run command**: Executes a VSCode command. Relying on ChatGPT's intelligence, this function may behave distinctively in newer versions of VSCode.
 
 # How to Use
-PromptRocket provides two ways of use, chat mode and command mode.
+You can use PromptRocket in two ways: chat mode and command mode.
 
 ## Customizable Chat Mode 
-Our chat mode lets you start a blank chat or use a custom template. Some templates might need extra context for better functionality. PromptRocket's smart text recognition gives accurate responses and full context understanding. Its ability to smoothly follow your focus across multiple files or code sections gives you a deeper insight.
+Chat mode allows you to initiate a blank chat or use a custom template. Some templates might require extra context for optimised operations. The intelligent text recognition of PromptRocket ensures precise responses and complete context comprehension. It can efficiently track your focus across different files or code sections, offering deeper insights.
 
-- **New Chat** - Launches a new, empty chat free of templates.
-- **Open Chat Template** - Begins a chat utilizing a personalized template.
+- **New Chat** - Ignites a new chat session, devoid of any templates.
+- **Open Chat Template** - Initiates a chat employing a customized template.
 
 ## Message Shortcuts 
-Message shortcuts lets you type less for repeatables, such as writing comments for the code, give code snippets, etc. This can be combined with commands like *Insert into editor*, so end result can be directly written into your editor.
+For repeating tasks like writing code comments, providing code snippets, etc., message shortcuts allow you to type less. Salient features like *Insert into editor* can be combined with commands to direct the result into your editor.
 
 - **Open Message Shortcut** - Opens a list of message shortcuts. 
 Shortcut is **ctrl(cmd) + shift + ;**.
 
-## Extra functions
-It also has a few extra functions for your quality of life.
+## Extra Functions
+A couple of additional features are also included for enhanced user experience.
 
 ### Commands
 
-- **Insert Last Codeblock to Editor** - This command automatically inserts the last codeblock in the chat into your editor.
-- **Send a Message to Chat** - Acts as a handy shortcut for sending messages to the chat. Just press **ctrl(cmd) + shift + '**, yon't need to use mouse!
+- **Insert Last Codeblock into Editor** - Automatically inputs the last chat's codeblock into your editor.
+- **Send a Message to Chat** - Serves as a convenient shortcut for sending chat messages. With **ctrl(cmd) + shift + '**, no need for mouse usage!
 
 ### General
 
-- **Copy or Insert Text into Editor** - Just select any text in the chat, it will display a group of buttons to copy text to clipboard, or send into editor.
+- **Copy or Insert Text into Editor** - Permits the selection of any chat text followed by a group of buttons to clone text to the clipboard or insert it into the editor.
 
 # Prompt Template Examples
-In PromptRocket, you can create various command templates and utilize Few-Shot Prompts by incorporating example conversations. While PromptRocket supplies default prompts for coding, you can also craft your own templates for general writing tasks.
 
-Here's one of the basic examples.
+In PromptRocket, you can design various command templates and employ Few-Shot Prompts through example conversations. While the default prompts for coding are provided by PromptRocket, you can create your own for general writing tasks.
+
+Here's a basic example:
 ```json
 {
     "name": "Identify Issues",
@@ -113,7 +98,7 @@ Here's one of the basic examples.
 }
 ```
 
-Here is a few-shot prompt example, which involves giving the AI a few examples of how it should respond, and reinforcing it with positive feedback. This greatly helps in keeping GPT-3.5's responses on track.
+This is a sample few-shot prompt, it involves giving the AI a few examples of the desired responses, and bolstering it with positive feedback. This tends to keep GPT-3.5's responses on track effectively.
 
 ```json
 {
@@ -122,7 +107,7 @@ Here is a few-shot prompt example, which involves giving the AI a few examples o
     "prompts": [
     {
         "role": "system",
-        "content": "You are the most powerful programming assistant in the world, who is expert in all programming languages and algorithms. Return a comment string about the given code."
+        "content": "You are the world's most powerful programming assistant, adept in all programming languages & algorithms. Return a descriptive comment string for the given code."
     },
     {
         "role": "user",
@@ -130,28 +115,27 @@ Here is a few-shot prompt example, which involves giving the AI a few examples o
     },
     {
         "role": "assistant",
-        "content": "// Write Hello World! to the console"
+        "content": "// Write 'Hello World!' to the console"
     },
     {
         "role": "user",
-        "content": "That was perfect! Here's another one: ```python def generate_fibonacci(n): if n <= 1: return n else: return(generate_fibonacci(n-1) + generate_fibonacci(n-2))```"
+        "content": "That was spot on! Here's another one: ```python def generate_fibonacci(n): if n <= 1: return n else: return(generate_fibonacci(n-1) + generate_fibonacci(n-2))```"
     },
     {
         "role": "assistant",
-        "content": "# Generate the nth Fibonacci number"
+        "content": "# Generates the nth Fibonacci number"
     },
     {
         "role": "user",
-        "content": "That was perfect! Here's another one: \\n```{{language}} {{context_after}}```"
+        "content": "That was spot on! Here's one more: \\n```{{language}} {{context_after}}```"
     }
     ]
 }
-```
 
-Messages use the handlebar template format, enabling you to include editor information such as the context surrounding the cursor, selected text, and the current language.
-Here's the complete list of tokens:
-- {{language}} - File's language setting
-- {{argument}} - Additional prompting for the template
-- {{context_before}} - Context before the cursor position or selected text
-- {{context_after}} - Context after the cursor position or selected text
-- {{selected_text}} - Currently selected text
+Messages utilize handlebar templates allowing you to include specifics from the editor, such as the context surrounding the cursor, selected text, and the current language. Here is the full list of tokens:
+
+{{language}} - Current file's language setting
+{{argument}} - Additional prompting for the template
+{{context_before}} - Context before the cursor position or selected text
+{{context_after}} - Context after the cursor position or selected text
+{{selected_text}} - Currently selected text

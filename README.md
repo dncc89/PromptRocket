@@ -135,12 +135,8 @@ This is a sample few-shot prompt, it involves giving the AI a few examples of th
 
 Messages utilize handlebar templates allowing you to include specifics from the editor, such as the context surrounding the cursor, selected text, and the current language. Here is the full list of tokens:
 
-{{language}} - Current file's language setting
-
-{{argument}} - Additional prompting for the template
-
-{{context_before}} - Context before the cursor position or selected text
-
-{{context_after}} - Context after the cursor position or selected text
-
-{{selected_text}} - Currently selected text
+- **{{language}}**: Current file's language setting
+- **{{argument}}**: Additional prompting for the template
+- **{{context_before}}**: Context before the cursor position or selected text
+- **{{context_after}}**: Context after the cursor position or selected text
+- **{{selected_text}}**: Currently selected text

@@ -581,5 +581,11 @@ export class ChatView implements vscode.WebviewViewProvider {
             command: "toggleFunctions",
             useFunctions: !currentState
         });
+        if (!currentState) {
+            this._postMessage('Enabled functions call', 'system');
+        }
+        else {
+            this._postMessage('Disabled functions call', 'system');
+        }
     }
 }

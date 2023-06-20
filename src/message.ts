@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 
 import { EventEmitter } from 'events';
 import { IMessage } from './interfaces';
+import { time } from "console";
 
 const { TextDecoder } = require("util");
 const { Writable } = require("stream");
@@ -11,7 +12,7 @@ const fetch = require("cross-fetch");
 export const streamCompletion = (payload: any) => {
     const emitter = new EventEmitter();
 
-    fetch("https://api.openai.com/v1/chat/completions", payload)
+    Promise.race([fetch("https://api.openai.com/v1/chat/completions", payload), timeout(5000)])
         .then((res: { ok: any; body: { pipe: (arg0: any) => void; }; }) => {
             if (!res.ok || !res.body) {
                 throw new Error(JSON.stringify(res));
@@ -86,14 +87,24 @@ export const streamCompletion = (payload: any) => {
     return emitter;
 };
 
+const timeout = (ms: number) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject(new Error("Request timed out"));
+        }, ms);
+    });
+};
+
 export const simpleCompletion = async (payload: any) => {
     try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", payload);
+        const completionPromise = fetch("https://api.openai.com/v1/chat/completions", payload);
+        const response = await Promise.race([completionPromise, timeout]);
+
         if (!response.ok) {
             throw new Error(JSON.stringify(response));
         }
+
         const data = await response.json();
-        // console.log(data);
         const text = data.choices[0].message.function_call.arguments;
         return JSON.parse(text).text;
     } catch (error) {

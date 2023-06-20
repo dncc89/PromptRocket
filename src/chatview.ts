@@ -380,6 +380,9 @@ export class ChatView implements vscode.WebviewViewProvider {
 
             const p = await payload.generatePayload(this._messages, this._apiKey, cmd);
             const stream = message.streamCompletion(p);
+            // Remove listeners to prevent duplicate messages
+            stream.removeAllListeners('data');
+            stream.removeAllListeners('end');
 
             let i = 0;
             let newMessage = '';

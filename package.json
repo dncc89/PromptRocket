@@ -3,7 +3,7 @@
   "publisher": "dncc89",
   "displayName": "PromptRocket",
   "description": "Run your own AI prompts in VSCode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "icon": "public/icon.png",
   "engines": {
     "vscode": "^1.78.0"

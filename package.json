@@ -2,8 +2,8 @@
   "name": "promptrocket",
   "publisher": "dncc89",
   "displayName": "PromptRocket",
-  "description": "Run your own AI prompts in VSCode",
-  "version": "0.1.1",
+  "description": "Experimental VSCode autopilot extension",
+  "version": "0.1.2",
   "icon": "public/icon.png",
   "engines": {
     "vscode": "^1.78.0"

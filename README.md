@@ -10,6 +10,7 @@ PromptRocket operates based on some core philosophies.
 1. **Autonomous agent**
 
 Using OpenAI's recent function call update, PromptRocket can interact smoothly with VSCode. PromptRocket is now empowered to make recursive action decisions to accomplish the task at hand. Functions currently tackled include context retrieval from the current file, project-wide file list, symbols, and diagnostics retrieval, direct output to the editor, and self-command execution in VSCode. 
+Autonomous behavior is recommended to use GPT-4, GPT-3.5 will not understand clear enough about the context and function usage to perform chained tasks.
 
 🚨 Caution: It might mess up your code or the entire project. Use responsibly.
 
@@ -41,7 +42,7 @@ Here are the current functionalities of PromptRocket that interface with VSCode:
 
 - **Send text**: Injects text directly into the editor.
 
-- **Find and select text**: Searches for text, choose the nearest candidate to the cursor if multiple are present.
+- **Find and select text**: Searches for text, choose  the nearest candidate to the cursor if multiple are present.
 
 - **Run command**: Executes a VSCode command. Relying on ChatGPT's intelligence, this function may behave distinctively in newer versions of VSCode.
 

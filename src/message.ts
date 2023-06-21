@@ -97,8 +97,7 @@ const timeout = (ms: number) => {
 
 export const simpleCompletion = async (payload: any) => {
     try {
-        const completionPromise = fetch("https://api.openai.com/v1/chat/completions", payload);
-        const response = await Promise.race([completionPromise, timeout]);
+        const response = await fetch("https://api.openai.com/v1/chat/completions", payload);
 
         if (!response.ok) {
             throw new Error(JSON.stringify(response));

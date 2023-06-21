@@ -328,7 +328,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                 },
                 {
                     "name": "find_and_select_text",
-                    "description": "Select a text in editor. This can be used for user's attention, search text, or editing text.",
+                    "description": "Select a text in editor.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -341,8 +341,8 @@ export class ChatView implements vscode.WebviewViewProvider {
                     },
                 },
                 {
-                    "name": "search_text",
-                    "description": "Runs an advanced AI search engine to find a relevant text in the file.",
+                    "name": "search_context",
+                    "description": "Search a whole file to find a relevant context.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -352,7 +352,7 @@ export class ChatView implements vscode.WebviewViewProvider {
                             },
                             "query": {
                                 "type": "string",
-                                "description": "Use natural language query, e.g. Where is the function to get the current time."
+                                "description": "Query in natural language format, e.g. Where is the function to get the current time?"
                             },
                         },
                         "required": ["filename", "query"],
@@ -468,7 +468,7 @@ export class ChatView implements vscode.WebviewViewProvider {
             case 'run_command':
                 result = await this._runCommand(request.command);
                 break;
-            case 'search_text':
+            case 'search_context':
                 result = await this._searchText(request.filename, request.query);
                 break;
             case 'find_and_select_text':
